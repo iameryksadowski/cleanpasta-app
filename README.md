@@ -43,7 +43,7 @@ cleanpasta --repair                     # fix the clipboard, then paste anywhere
 
 `cleanpasta --help` lists every option. The `skills/cleanpasta` skill teaches Claude to hand over drafts through `cleanpasta --copy`, so they paste already formatted.
 
-**Raycast:** Settings > General > Add to Raycast saves the commands as Raycast Quicklinks and opens Raycast; there, run Import Quicklinks and pick "Cleanpasta for Raycast.json" in Downloads. The links work in any launcher or script: `cleanpasta://paste`, `://repair`, `://settings`, `://about`.
+**Raycast:** Settings > Raycast > Raycast commands saves the commands as Raycast Quicklinks and opens Raycast; there, run Import Quicklinks and pick "Cleanpasta for Raycast.json" in Downloads. The links work in any launcher or script: `cleanpasta://paste`, `://repair`, `://settings`, `://about`.
 
 ## How it works
 

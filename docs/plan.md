@@ -1,10 +1,10 @@
 # ES Tools - plan od A do Z
 
-Stan: 29.09.2026. Autor planu: Eryk Sadowski. Ten plik jest źródłem prawdy dla prac nad ES Tools i apką Clean Paste; statusy faz aktualizujemy tutaj.
+Stan: 29.09.2026. Autor planu: Eryk Sadowski. Ten plik jest źródłem prawdy dla prac nad ES Tools i apką Cleanpasta (zmiana nazwy w 1.1.0: sekcja 6a); statusy faz aktualizujemy tutaj.
 
 ## 0. Cel
 
-- **Dziś:** Maciek dostaje działającą apkę Clean Paste. Instalacja bez terminala: plik DMG, przeciągnij do Aplikacji, jedno kliknięcie w uprawnienia.
+- **Dziś:** Maciek dostaje działającą apkę Cleanpasta. Instalacja bez terminala: plik DMG, przeciągnij do Aplikacji, jedno kliknięcie w uprawnienia.
 - **Szerzej:** ES Tools to linia małych, bardzo użytecznych narzędzi na wspólnym fundamencie (brand, ustawienia, aktualizacje z changelogiem, integracja z Raycastem), marka podrzędna Eryk Sadowski.
 
 ## 1. Decyzje architektoniczne
@@ -13,8 +13,8 @@ Stan: 29.09.2026. Autor planu: Eryk Sadowski. Ten plik jest źródłem prawdy dl
 |---|---|---|---|
 | D1 | Jedno repo na produkt, plus `estools-docs` (brand, katalog) i później `estools-lib-core` | każdy produkt ma własne wydania i aktualizacje; `eryksadowski-tools` to katalog na jednorazowe zadania | `estools-tools` (typ `tools` = skrypty, nazwa "tools-tools") |
 | D2 | Osobne apki, nie launcher z pluginami | różne narzędzia, różne uprawnienia; launcherem jest już Raycast | launcher ES Tools |
-| D3 | Clean Paste = natywna apka AppKit + SwiftUI, w pasku menu; ikona w Docku tylko przy otwartym oknie ustawień lub aktualizacji | lekka, zawsze pod ręką, nie zaśmieca Docka | Electron, sam Raycast |
-| D4 | Konwersja: jedno źródło `convert.ts` (repo Raycasta), w apce przez JavaScriptCore z pliku `Resources/convert.js` (esbuild) | jedna logika i jedne testy dla Raycasta i apki | port do Swift (dwie implementacje do utrzymania) |
+| D3 | Cleanpasta = natywna apka AppKit + SwiftUI, w pasku menu; ikona w Docku tylko przy otwartym oknie ustawień lub aktualizacji | lekka, zawsze pod ręką, nie zaśmieca Docka | Electron, sam Raycast |
+| D4 | Konwersja: jedno źródło `converter/src/convert.ts` (do 15.10.2026 w repo Raycasta, R5), w apce przez JavaScriptCore z pliku `Resources/convert.js` (esbuild) | jedna logika i jedne testy dla Raycasta i apki | port do Swift (dwie implementacje do utrzymania) |
 | D5 | Schowek natywnie: NSPasteboard (HTML, web archive, RTF, tekst), wklejanie przez CGEvent Cmd+V po puszczeniu modyfikatorów | ten sam algorytm co w rozszerzeniu, sprawdzony w Mailu | Raycast Clipboard API |
 | D6 | Skróty globalne przez Carbon `RegisterEventHotKey`, własne pole do nagrywania skrótu | działa bez Dostępności i bez zależności | biblioteki zewnętrzne |
 | D7 | Start przy logowaniu przez `SMAppService.mainApp` | systemowy sposób od macOS 13 | LaunchAgent w plist |
@@ -25,16 +25,16 @@ Stan: 29.09.2026. Autor planu: Eryk Sadowski. Ten plik jest źródłem prawdy dl
 | D12 | Minimum macOS 14 | JavaScriptCore z macOS 14 obsługuje wszystkie wyrażenia regularne konwertera (lookbehind, `\p{L}`) | macOS 13 |
 | D13 | UI po angielsku (brand ES Tools), instrukcja dla Maćka po polsku | zasada brandu; polska lokalizacja później | - |
 | D14 | (zastąpione przez D20) | | |
-| D16 | Uniwersalność: jedna biblioteka `CleanPasteCore` (konwerter, schowek, opcje) używana przez apkę i przez CLI `cleanpaste`; testy wklejania nie tylko w Mailu, także Gmail (Chrome), Slack, Notatki, Pages, Word | narzędzie ma działać wszędzie, gdzie się wkleja, i w automatyzacji | logika zaszyta w apce |
-| D17 | CLI `cleanpaste` w paczce apki (`Contents/Helpers/cleanpaste`), instalowane z ustawień jednym kliknięciem jako link w `~/.local/bin` (bez hasła administratora) | Eryk, skrypty, Raycast Script Commands i agenci AI mogą czyścić i kopiować tekst bez klikania | osobna instalacja przez Homebrew (później) |
-| D18 | Skill AI `clean-paste`: uczy Claude'a pisać drafty w Markdown i oddawać je przez `cleanpaste --copy`, żeby Eryk wklejał gotowy, sformatowany tekst; źródło w repo apki (`skills/clean-paste`), kopia w `eryksadowski-tools/skills` | AI przygotowuje maile i wiadomości gotowe do wklejenia, bez ręcznego formatowania | instrukcje w CLAUDE.md |
-| D19 | Jedna ikona ES Tools w pasku menu: sygnet ES, pod nim sekcje narzędzi (dziś tylko Clean Paste). Przy drugim narzędziu: wspólny rejestr w `~/Library/Application Support/ES Tools/`, pierwsza uruchomiona apka ES Tools pokazuje ikonę i menu wszystkich narzędzi, pozostałe chowają swoje; akcje przez schematy URL narzędzi (część `estools-lib-core`) | wiele narzędzi nie zaśmieca paska menu, marka jest jedna | osobna ikona każdego narzędzia |
+| D16 | Uniwersalność: jedna biblioteka `CleanpastaCore` (konwerter, schowek, opcje) używana przez apkę i przez CLI `cleanpasta`; testy wklejania nie tylko w Mailu, także Gmail (Chrome), Slack, Notatki, Pages, Word | narzędzie ma działać wszędzie, gdzie się wkleja, i w automatyzacji | logika zaszyta w apce |
+| D17 | CLI `cleanpasta` w paczce apki (`Contents/Helpers/cleanpasta`), instalowane z ustawień jednym kliknięciem jako link w `~/.local/bin` (bez hasła administratora) | Eryk, skrypty, Raycast Script Commands i agenci AI mogą czyścić i kopiować tekst bez klikania | osobna instalacja przez Homebrew (później) |
+| D18 | Skill AI `cleanpasta`: uczy Claude'a pisać drafty w Markdown i oddawać je przez `cleanpasta --copy`, żeby Eryk wklejał gotowy, sformatowany tekst; źródło prawdy od 26.10.2026 w `estools-skills` (plugin `estools`), kopia do dystrybucji w repo apki (`skills/cleanpasta`) | AI przygotowuje maile i wiadomości gotowe do wklejenia, bez ręcznego formatowania | instrukcje w CLAUDE.md |
+| D19 | Jedna ikona ES Tools w pasku menu: sygnet ES, pod nim sekcje narzędzi (dziś tylko Cleanpasta). Przy drugim narzędziu: wspólny rejestr w `~/Library/Application Support/ES Tools/`, pierwsza uruchomiona apka ES Tools pokazuje ikonę i menu wszystkich narzędzi, pozostałe chowają swoje; akcje przez schematy URL narzędzi (część `estools-lib-core`) | wiele narzędzi nie zaśmieca paska menu, marka jest jedna | osobna ikona każdego narzędzia |
 | D20 | Ikony apek ES Tools: duży sygnet ES w tle (jak w PDF-ach marki), znak narzędzia na środku w zieleni; wersja jasna domyślna, ciemna podmieniana w locie; propozycje w `design/proposals` (wybrana E) | spójna rodzina ikon, jedno narzędzie od drugiego odróżnia znak na środku | napis w ikonie |
-| D15 | Integracja z Raycastem: apka ma schemat URL `estools-clean-paste://paste`, `://repair`, `://settings`; rozszerzenie Raycasta zostaje i działa samodzielnie | Raycast może wywołać apkę jednym deeplinkiem | - |
+| D15 | Integracja z Raycastem: apka ma schemat URL `cleanpasta://paste`, `://repair`, `://settings`, `://about` (stary schemat z 1.0.x nadal działa, R2); rozszerzenie Raycasta zarchiwizowane (R5, R7) | Raycast może wywołać apkę jednym deeplinkiem | - |
 
-## 2. Specyfikacja: ES Tools Clean Paste 1.0.0 (apka)
+## 2. Specyfikacja: ES Tools Cleanpasta (apka, od 1.0.0)
 
-- **Pasek menu:** ikona schowka. Menu: Paste Clean (skrót), Repair Clipboard (skrót), Settings..., Check for Updates..., About Clean Paste, Quit.
+- **Pasek menu:** ikona schowka. Menu: Paste Clean (skrót), Repair Clipboard (skrót), Settings..., Check for Updates..., About Cleanpasta, Quit.
 - **Paste Clean** (domyślnie ⌃⌥⌘V): czyta schowek, czyści formatowanie, zapisuje wynik i sam wciska Cmd+V. Pusty schowek albo sam obraz lub plik: zwykłe Cmd+V. Brak Dostępności: czysty tekst zostaje w schowku i pojawia się podpowiedź.
 - **Repair Clipboard** (bez domyślnego skrótu): czyści schowek w miejscu, bez wklejania. Podpowiedź: "Clipboard repaired - paste with Cmd+V". Nazwa zamiast "Clean Clipboard", bo nie kasuje schowka.
 - **Czyszczenie:** zostają pogrubienia, kursywa, podkreślenia, linki, entery, twarde spacje, listy i proste tabele; znikają tła, kolory i fonty. Markdown zamienia się na tekst sformatowany. Myślniki i cudzysłowy typograficzne zamieniają się na znaki z klawiatury.
@@ -47,12 +47,12 @@ Stan: 29.09.2026. Autor planu: Eryk Sadowski. Ten plik jest źródłem prawdy dl
   - Stopka: ES Tools by Eryk Sadowski · eryksadowski.com.
 - **Pierwsze uruchomienie:** otwiera ustawienia z sekcją powitalną i krokiem "Allow Accessibility".
 - **Prywatność:** brak telemetrii; sieć tylko do sprawdzania aktualizacji.
-- **General w ustawieniach:** także "Install command line tool" (link `cleanpaste` w `~/.local/bin`, z informacją o PATH).
+- **General w ustawieniach:** także "Install command line tool" (link `cleanpasta` w `~/.local/bin`, z informacją o PATH).
 
-## 2a. Specyfikacja: CLI `cleanpaste`
+## 2a. Specyfikacja: CLI `cleanpasta`
 
 ```
-cleanpaste [FILE] [options]
+cleanpasta [FILE] [options]
   wejście: FILE, albo stdin (gdy jest), albo schowek
   --markdown | --html | --text   typ wejścia (domyślnie: auto, jak w apce)
   --copy                         wynik do schowka (HTML + tekst)
@@ -67,16 +67,16 @@ cleanpaste [FILE] [options]
 
 Kody wyjścia: 0 ok, 1 błąd użycia, 2 nic do wyczyszczenia, 3 brak Dostępności przy --paste.
 
-## 2b. Skill AI `clean-paste`
+## 2b. Skill AI `cleanpasta`
 
 - Kiedy: Eryk prosi o maila, wiadomość albo odpowiedź do wklejenia (Mail, Gmail, Slack, WhatsApp), albo o "skopiuj mi to sformatowane".
-- Jak: Claude pisze treść w Markdown (pogrubienia, listy, linki), zapisuje do pliku tymczasowego i uruchamia `cleanpaste --markdown --copy PLIK`; mówi Erykowi "w schowku, wklej Cmd+V". Bez apki (czat w przeglądarce): oddaje czysty Markdown i przypomina o Paste Clean.
+- Jak: Claude pisze treść w Markdown (pogrubienia, listy, linki), zapisuje do pliku tymczasowego i uruchamia `cleanpasta --markdown --copy PLIK`; mówi Erykowi "w schowku, wklej Cmd+V". Bez apki (czat w przeglądarce): oddaje czysty Markdown i przypomina o Paste Clean.
 - Zasady: proste cudzysłowy i krótki myślnik już w treści; nic nie wysyła sam.
 
 ## 2c. Instalacja i aktualizacje bez licencji
 
 - **Pierwsza instalacja, sposób 1 (polecany):** jedna komenda w Terminalu, skopiowana z README albo od Eryka:
-  `curl -fsSL https://github.com/iameryksadowski/estools-app-clean-paste/releases/latest/download/install.sh | sh`.
+  `curl -fsSL https://github.com/iameryksadowski/estools-app-cleanpasta/releases/latest/download/install.sh | sh`.
   Skrypt pobiera najnowszy zip, rozpakowuje do Aplikacji i uruchamia apkę. curl nie nadaje flagi kwarantanny, więc nie ma żadnego ostrzeżenia.
 - **Pierwsza instalacja, sposób 2:** DMG z przeglądarki, przeciągnij do Aplikacji, przy pierwszym uruchomieniu raz "Otwórz mimo to" w Ustawieniach systemowych (Prywatność i ochrona). Instrukcja ze zrzutami w DMG i w `docs/instalacja.md`.
 - **Aktualizacje:** apka raz dziennie sprawdza `appcast.xml`. Gdy jest nowa wersja, pokazuje okno z changelogiem i przyciskiem Install Update; pobiera, sprawdza podpis EdDSA, podmienia się i uruchamia ponownie. Bez ostrzeżeń macOS i bez ponownego nadawania Dostępności (stały certyfikat).
@@ -85,22 +85,24 @@ Kody wyjścia: 0 ok, 1 błąd użycia, 2 nic do wyczyszczenia, 3 brak Dostępno�
 - **Wydanie:** `scripts/release.sh` (lokalnie): build, podpis, zip, DMG, `install.sh`, appcast z changelogiem, GitHub Release. Później GitHub Actions po push na `main` z nową wersją (klucze jako sekrety repo).
 - **Wtyczka do Illustratora:** osobne, proste sprawdzanie wersji (plik z numerem wersji w GitHub Release i komunikat "jest nowa wersja, pobierz").
 
-## 3. Repo `estools-app-clean-paste`
+## 3. Repo `estools-app-cleanpasta`
 
 ```
 Package.swift                 SPM, zależność Sparkle
-Sources/CleanPasteCore/       biblioteka: Converter, Clipboard, Options, Markdown body
-Sources/CleanPaste/           apka: main, AppDelegate, HotKeys, Preferences, ShortcutField,
-                              SettingsView, HUD, Updater, CLI installer
-Sources/cleanpaste/           CLI
-skills/clean-paste/           skill AI
-Resources/convert.js          generowany z repo Raycasta (scripts/build-converter.sh), commitowany
+Sources/CleanpastaCore/       biblioteka: Converter, Clipboard, Options, Markdown body, CLI installation
+Sources/CleanpastaApp/        apka: main, AppDelegate, HotKeys, Preferences, ShortcutField,
+                              SettingsView, AboutView, HUD, Updater, CLI installer
+Sources/CLI/                  CLI cleanpasta
+converter/                    konwerter TypeScript (convert.ts), testy jednostkowe i wklejania, lab WebKit
+skills/cleanpasta/            skill AI (kopia; źródło prawdy w estools-skills)
+Resources/convert.js          generowany z converter/ (scripts/build-converter.sh), commitowany
 Resources/AppIcon.icns        z design/icon.svg (scripts/make-icon.sh)
 Resources/Info.plist          szablon (wersja wstawiana przy budowie)
 design/icon.svg               źródło ikony
 scripts/build-app.sh          .app + podpis + zip + dmg
 scripts/release.sh            wydanie: build, podpis EdDSA, appcast.xml, GitHub Release
-tests/                        testy konwertera w JavaScriptCore na fixture'ach z repo Raycasta
+tests/                        zgodność JavaScriptCore z TypeScript, CLI, instalacja CLI, paczka
+windows/                      wersja Windows (Tauri 2, podgląd, docs/windows.md)
 docs/plan.md                  ten plik
 docs/instalacja.md            instrukcja po polsku (dla Maćka)
 README.md, CHANGELOG.md, CLAUDE.md, LICENSE
@@ -116,10 +118,10 @@ Każda faza kończy się commitem na `development` i spełnionymi kryteriami odb
 - **Odbiór:** `scripts/test.sh` przechodzi.
 
 ### F2. Rdzeń
-- Biblioteka `CleanPasteCore`: Converter, Clipboard (odczyt HTML, web archive, RTF, tekst; zapis; Cmd+V po puszczeniu modyfikatorów), Options.
-- CLI `cleanpaste` wg specyfikacji 2a.
+- Biblioteka `CleanpastaCore`: Converter, Clipboard (odczyt HTML, web archive, RTF, tekst; zapis; Cmd+V po puszczeniu modyfikatorów), Options.
+- CLI `cleanpasta` wg specyfikacji 2a.
 - Apka: HotKeys, Preferences.
-- **Odbiór:** `cleanpaste` czyści plik, stdin i schowek; wynik identyczny z testami Raycasta; skrót w apce czyści schowek.
+- **Odbiór:** `cleanpasta` czyści plik, stdin i schowek; wynik identyczny z testami Raycasta; skrót w apce czyści schowek.
 
 ### F3. Interfejs
 - Menu w pasku, okno ustawień (SwiftUI), zmiana ikony w Docku przy oknie, pole skrótu, podpowiedź HUD, pierwsze uruchomienie, schemat URL.
@@ -130,7 +132,7 @@ Każda faza kończy się commitem na `development` i spełnionymi kryteriami odb
 - **Odbiór:** ikona czytelna w 16, 32, 128 i 512 px; zgodna z BRAND.md (jeden akcent, bez gradientów).
 
 ### F5. Paczka
-- `build-app.sh`: `Clean Paste.app` (Info.plist, LSUIElement, ikona, convert.js, Sparkle.framework), podpis ad-hoc, zip i DMG.
+- `build-app.sh`: `Cleanpasta.app` (Info.plist, LSUIElement, ikona, convert.js, Sparkle.framework), podpis ad-hoc, zip i DMG.
 - Test wklejania przez lab WebKit z repo Raycasta i ręcznie w TextEdit.
 - `docs/instalacja.md` po polsku: instalacja, "Otwórz mimo to", Dostępność, skrót, co robi każda opcja.
 - **Odbiór:** DMG instaluje się na czystym koncie; Paste Clean działa w Mailu.
@@ -142,8 +144,8 @@ Każda faza kończy się commitem na `development` i spełnionymi kryteriami odb
 - **Odbiór:** wersja 1.0.0 wykrywa testowe wydanie 1.0.1 i pokazuje changelog.
 
 ### F6b. Skill AI
-- `skills/clean-paste/SKILL.md` w repo apki, kopia i zip w `eryksadowski-tools/skills`, upload na claude.ai.
-- **Odbiór:** w nowej sesji Claude na prośbę "napisz maila do X i daj mi do wklejenia" kładzie sformatowany tekst do schowka przez `cleanpaste`.
+- `skills/cleanpasta/SKILL.md` (źródło prawdy: `estools-skills`, plugin `estools`), kopia w repo apki.
+- **Odbiór:** w nowej sesji Claude na prośbę "napisz maila do X i daj mi do wklejenia" kładzie sformatowany tekst do schowka przez `cleanpasta`.
 
 ### F7. Przekazanie Maćkowi
 - Paczka: DMG + instrukcja. Wysyła Eryk.
@@ -195,15 +197,15 @@ Wydanie: 1.1.0. Sprzątanie na Macu Eryka: stare rozszerzenie Raycasta (do Kosza
 
 - [x] F0 Plan
 - [x] F1 Szkielet i konwerter (20/20 testów zgodności JavaScriptCore z TypeScript)
-- [x] F2 Rdzeń (biblioteka, CLI `cleanpaste`, skróty, ustawienia)
+- [x] F2 Rdzeń (biblioteka, CLI, skróty, ustawienia)
 - [x] F3 Interfejs (pasek menu z sygnetem ES, okno ustawień, Dock tylko przy oknie - sprawdzone, HUD, schemat URL - Repair sprawdzony na żywo)
 - [x] F4 Ikona i brand (wariant E: sygnet w tle, zielony schowek; jasna domyślnie, ciemna w locie)
 - [x] F5 Paczka (universal .app, zip, DMG, instrukcja PL; podpis ad-hoc do czasu F6)
-- [x] F6 Aktualizacje - repo publiczne, certyfikat "ES Tools Code Signing" w pęku kluczy, klucz EdDSA w pliku, kopie w 1Password (Sadowscy > Work > "ES Tools - Clean Paste signing"); Release v1.0.0 opublikowany, komenda instalacyjna sprawdzona; aktualizacja 1.0.0 -> 1.0.1 sprawdzona lokalnie. Do zrobienia: wydanie automatycznie z GitHub Actions po zmianie wersji na `main`
-- [x] F6b Skill AI (`clean-paste` wgrany na claude.ai, kopia w `eryksadowski-tools/skills`)
+- [x] F6 Aktualizacje - repo publiczne, certyfikat "ES Tools Code Signing" w pęku kluczy, klucz EdDSA w pliku, kopie w 1Password (Sadowscy > Work > "ES Tools - Cleanpasta signing", ta sama nazwa co w `scripts/release.sh`); Release v1.0.0 opublikowany, komenda instalacyjna sprawdzona; aktualizacja 1.0.0 -> 1.0.1 sprawdzona lokalnie. Do zrobienia: wydanie automatycznie z GitHub Actions po zmianie wersji na `main`
+- [x] F6b Skill AI (wgrany na claude.ai; od 1.1.0 jako `cleanpasta`, od 26.10.2026 w pluginie `estools`)
 - [x] F7 Przekazanie Maćkowi - DMG 1.0.0 z PDF "Jak zainstalować" oddany Erykowi (01.10)
 - [x] F8 Porządki ES Tools (`estools-docs` z historią brandu, Logo Export z historią z powrotem w swoim repo, rejestr nazw) - PR-y zmergowane
-- [x] F10 Cleanpasta (zmiana nazwy, listy numerowane, Raycast z ustawień, skróty do usunięcia, porządek) - 1.1.0, migracja z Clean Paste sprawdzona lokalnie
+- [x] F10 Cleanpasta (zmiana nazwy, listy numerowane, Raycast z ustawień, skróty do usunięcia, porządek) - 1.1.0, migracja instalacji 1.0.x sprawdzona lokalnie
 - [ ] F9 Później
 
 
