@@ -6,6 +6,7 @@
 	<string>Cleanpasta</string>
 	<key>CFBundleDisplayName</key>
 	<string>Cleanpasta</string>
+	<!-- Kept from 1.0.x: Sparkle updates, settings, login item and the Accessibility permission are tied to it. -->
 	<key>CFBundleIdentifier</key>
 	<string>com.eryksadowski.estools.cleanpaste</string>
 	<key>CFBundleExecutable</key>
@@ -36,6 +37,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>cleanpasta</string>
+				<!-- Legacy migration: links made before 1.1.0. -->
 				<string>estools-clean-paste</string>
 			</array>
 		</dict>

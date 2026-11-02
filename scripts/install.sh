@@ -34,6 +34,7 @@ rollback() {
 }
 trap rollback EXIT
 ditto "$TMP/Cleanpasta.app" "$STAGE/Cleanpasta.app"
+# Bundle identifier kept from 1.0.x for update continuity (settings, Accessibility).
 osascript -e 'tell application id "com.eryksadowski.estools.cleanpaste" to quit' >/dev/null 2>&1 || true
 if [ -e "$DEST/Cleanpasta.app" ]; then
   mv "$DEST/Cleanpasta.app" "$BACKUP"

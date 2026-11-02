@@ -28,6 +28,7 @@ try fm.createSymbolicLink(atPath: link.path, withDestinationPath: "/other/tool")
 do { try CLIInstallation.install(helper: helper, folder: folder); fatalError("overwrote unrelated link") } catch {}
 precondition(try! fm.destinationOfSymbolicLink(atPath: link.path) == "/other/tool")
 try fm.removeItem(at: link)
+// Legacy migration: links into a 1.0.x bundle and the old cleanpaste command.
 try fm.createSymbolicLink(atPath: link.path, withDestinationPath: root.appendingPathComponent("Clean Paste.app/Contents/Helpers/cleanpaste").path)
 try CLIInstallation.install(helper: helper, folder: folder)
 precondition(try! fm.destinationOfSymbolicLink(atPath: link.path) == helper.path)

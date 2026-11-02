@@ -60,6 +60,7 @@ sign() { codesign --force --timestamp=none --sign "$IDENTITY" "$@"; }
 sign "$APP/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app"
 sign "$APP/Contents/Frameworks/Sparkle.framework/Versions/B/Autoupdate"
 sign "$APP/Contents/Frameworks/Sparkle.framework"
+# Identifier follows the app's bundle identifier, kept from 1.0.x for update continuity.
 sign --identifier com.eryksadowski.estools.cleanpaste.cli "$APP/Contents/Helpers/cleanpasta"
 sign "$APP"
 codesign --verify --deep --strict "$APP"

@@ -59,7 +59,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     // cleanpasta://paste, ://repair, ://settings, ://about (Raycast, scripts)
     func application(_ application: NSApplication, open urls: [URL]) {
-        for url in urls where ["cleanpasta", "estools-clean-paste"].contains(url.scheme ?? "") { // the second one: links made before the rename
+        for url in urls where ["cleanpasta", "estools-clean-paste"].contains(url.scheme ?? "") { // legacy migration: the second scheme keeps links made before 1.1.0 working
             switch url.host ?? url.path.trimmingCharacters(in: CharacterSet(charactersIn: "/")) {
             case "paste": pasteClean(delay: 0.35) // let a launcher (Raycast) close and the target app come back
             case "repair": repairClipboard()
@@ -273,8 +273,9 @@ enum DockIcon {
     }
 }
 
-/// From "Clean Paste" (1.0.x) to "Cleanpasta" (1.1.0). Sparkle installs the update under
-/// the old file name, so the app renames itself once and moves the rest along.
+/// Legacy migration from the 1.0.x app name to "Cleanpasta" (1.1.0). Sparkle installs the update
+/// under the old file name, so the app renames itself once and moves the rest along.
+/// Keep it while 1.0.x installations may still update; the old names below exist only for that.
 enum Migration {
     static let oldBundleName = "Clean Paste.app"
     static let newBundleName = "Cleanpasta.app"

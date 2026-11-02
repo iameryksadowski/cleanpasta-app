@@ -61,6 +61,7 @@ var paste = false
 var repair = false
 var printFormat: String?
 // Defaults follow the app's settings, so the CLI and the app clean the same way.
+// The suite is the app's bundle identifier, kept from 1.0.x for update continuity (see Resources/Info.plist).
 let appDefaults = UserDefaults(suiteName: "com.eryksadowski.estools.cleanpaste")
 var options = CleanOptions(
     replaceDashes: appDefaults?.object(forKey: "replaceDashes") as? Bool ?? true,
