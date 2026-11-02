@@ -44,7 +44,7 @@ cell, pad, cols = 230, 30, 4
 rows = (len(V) + cols - 1) // cols
 W = cols * (2 * cell + pad) + pad; H = rows * (cell + 70) + 90
 parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}"><rect width="{W}" height="{H}" fill="#E9E9EC"/>',
-         text(pad, 55, 30, "#171717", "Clean Paste - sygnet w tle, ikona na środku (jasna | ciemna)", 600, anchor="start")]
+         text(pad, 55, 30, "#171717", "Cleanpasta - sygnet w tle, ikona na środku (jasna | ciemna)", 600, anchor="start")]
 for i, (name, fn) in enumerate(V):
     r, cidx = divmod(i, cols); x = pad + cidx * (2 * cell + pad); y = 90 + r * (cell + 70)
     for j, pal in enumerate((L, D)):

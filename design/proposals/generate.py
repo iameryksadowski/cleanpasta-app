@@ -1,5 +1,5 @@
 import re, sys, pathlib
-B = "/Users/iames/Development/eryksadowski-tools/estools/brand/logo/"
+B = str(pathlib.Path.home() / "Development/estools-docs/brand/logo") + "/"  # ES Tools brand files
 RING = re.search(r'<path d="([^"]+)"', open(B + "estools-icon.svg").read()).group(1)
 WM = re.findall(r'<path d="([^"]+)"', open(B + "estools-wordmark-dark.svg").read())
 OUT = pathlib.Path(sys.argv[1])
@@ -55,8 +55,8 @@ def v2(p): return ring(512, 512, 560, p["accent"]) + clip(455, 437, 150, p["fg"]
 def v3(p): return ring(512, 450, 440, p["accent"]) + text(512, 810, 92, p["fg"], "paste", 600, ls=-2)
 @v("Wordmark estools + schowek w rogu")
 def v4(p): return wordmark(512, 470, 640, p["fg"]) + clip(700, 650, 170, p["accent"], p["bg"], p["accent"])
-@v("Pierścień + etykieta Clean Paste")
-def v5(p): return ring(512, 440, 420, p["accent"]) + f'<rect x="262" y="720" width="500" height="112" rx="56" fill="{p["fg"]}"/>' + text(512, 795, 58, p["bg"], "Clean Paste", 600)
+@v("Pierścień + etykieta Cleanpasta")
+def v5(p): return ring(512, 440, 420, p["accent"]) + f'<rect x="262" y="720" width="500" height="112" rx="56" fill="{p["fg"]}"/>' + text(512, 795, 58, p["bg"], "Cleanpasta", 600)
 @v("Pierścień + monogram CP w rogu")
 def v6(p): return ring(470, 470, 480, p["accent"]) + badge_circle(735, 735, 130, p, text(735, 772, 104, p["fg"], "CP", 700, ls=-4))
 @v("Pierścień + schowek w rogu bez tła")
@@ -86,9 +86,9 @@ def v17(p): return text(470, 600, 400, p["fg"], "es", 600, ls=-24) + clip(690, 6
 @v("Pierścień + zielona naklejka V")
 def v18(p): return ring(470, 470, 480, p["fg"]) + f'<rect x="650" y="650" width="200" height="200" rx="48" fill="{p["accent"]}"/>' + text(750, 790, 130, p["on_accent"], "V", 700)
 @v("Pierścień + schowek i nazwa")
-def v19(p): return ring(512, 430, 400, p["accent"]) + clip(300, 700, 120, p["fg"], p["bg"]) + text(400, 790, 72, p["fg"], "Clean Paste", 600, anchor="start", ls=-2)
+def v19(p): return ring(512, 430, 400, p["accent"]) + clip(300, 700, 120, p["fg"], p["bg"]) + text(400, 790, 72, p["fg"], "Cleanpasta", 600, anchor="start", ls=-2)
 @v("Pierścień + nazwa pod spodem mono")
-def v20(p): return ring(512, 450, 450, p["accent"]) + text(512, 800, 54, p["muted"], "CLEAN PASTE", 500, family="Geist Mono", ls=8)
+def v20(p): return ring(512, 450, 450, p["accent"]) + text(512, 800, 54, p["muted"], "CLEANPASTA", 500, family="Geist Mono", ls=8)
 
 OUT.mkdir(parents=True, exist_ok=True)
 cell, pad, cols = 220, 30, 5
@@ -96,7 +96,7 @@ rows = (len(V) + cols - 1) // cols
 W = cols * (2 * cell + pad) + pad
 H = rows * (cell + 70) + 90
 parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}"><rect width="{W}" height="{H}" fill="#E9E9EC"/>',
-         text(pad, 55, 30, "#171717", "ES Tools Clean Paste - 20 propozycji ikony (jasna | ciemna)", 600, anchor="start")]
+         text(pad, 55, 30, "#171717", "ES Tools Cleanpasta - 20 propozycji ikony (jasna | ciemna)", 600, anchor="start")]
 for i, (name, f) in enumerate(V):
     r, c = divmod(i, cols)
     x = pad + c * (2 * cell + pad); y = 90 + r * (cell + 70)
