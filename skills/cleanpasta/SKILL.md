@@ -3,7 +3,7 @@ name: cleanpasta
 description: "Hand over emails, messages and replies ready to paste with their formatting (bold, lists, links) through Cleanpasta and its cleanpasta command line tool on macOS. Use when the user asks for an email, message, reply, post or any text to paste into Mail, Gmail, Outlook, Slack, Notion, WhatsApp or a document, or says copy it formatted, put it on my clipboard, give me something to paste, clean paste, fix the clipboard or remove the formatting."
 metadata:
   version: 1.2.0
-  updated: 2026-10-15
+  updated: 2026-11-07
   author: Eryk Sadowski
 ---
 
