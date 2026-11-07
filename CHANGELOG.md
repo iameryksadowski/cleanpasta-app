@@ -1,6 +1,20 @@
-# ES Tools Cleanpasta Changelog
+# Cleanpasta Changelog
 
-Until 1.0.1 the app was called ES Tools Clean Paste.
+Until 1.0.1 the app was called Clean Paste.
+
+## [1.2.0] - 2026-11-07
+
+### Changed
+
+- **The ES Tools name is gone.** The app is just Cleanpasta; "Eryk Sadowski" is its signature in the About window and footers, no longer part of the name. The About window lost its ES Tools section and the app and menu bar icons lost the ES ring: the app icon is the green clipboard, the menu bar icon is a plain clipboard.
+- **New identifiers.** Bundle identifier `com.eryksadowski.cleanpasta` (the command line tool: `com.eryksadowski.cleanpasta.cli`), signing certificate "Eryk Sadowski Code Signing", repository `iameryksadowski/cleanpasta-app`. The update feed and every link point to the new repository. Because the identifier and the signature change, install 1.2.0 by hand instead of waiting for an update from 1.1.x.
+- On first launch the settings and shortcuts are copied once from the previous identifier, so an existing installation keeps them. The old settings are left in place.
+- Windows: identifier `com.eryksadowski.cleanpasta`, settings in `%APPDATA%\cleanpasta`, command line tool installed to `%LOCALAPPDATA%\Cleanpasta\bin`, settings window without the wordmark.
+
+### Removed
+
+- The old `estools-clean-paste://` link scheme. Use `cleanpasta://`.
+
 
 ## [1.1.1] - 2026-10-16
 

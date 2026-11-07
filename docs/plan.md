@@ -1,38 +1,40 @@
-# ES Tools - plan od A do Z
+# Cleanpasta - plan od A do Z
 
-Stan: 29.09.2026. Autor planu: Eryk Sadowski. Ten plik jest źródłem prawdy dla prac nad ES Tools i apką Cleanpasta (zmiana nazwy w 1.1.0: sekcja 6a); statusy faz aktualizujemy tutaj.
+Stan: 29.09.2026, uzupełniony 07.11.2026. Autor planu: Eryk Sadowski. Ten plik jest źródłem prawdy dla prac nad apką Cleanpasta (zmiana nazwy w 1.1.0: sekcja 6a; rezygnacja z nazwy "ES Tools" w 1.2.0: sekcja 6b); statusy faz aktualizujemy tutaj.
+
+07.11.2026: nazwa ES Tools porzucona (decyzja Eryka); nowy identyfikator pakietu, certyfikat i nazwa repo; nie ma jeszcze użytkowników poza Erykiem, więc bez migracji poza skopiowaniem jego własnych ustawień.
 
 ## 0. Cel
 
 - **Dziś:** Maciek dostaje działającą apkę Cleanpasta. Instalacja bez terminala: plik DMG, przeciągnij do Aplikacji, jedno kliknięcie w uprawnienia.
-- **Szerzej:** ES Tools to linia małych, bardzo użytecznych narzędzi na wspólnym fundamencie (brand, ustawienia, aktualizacje z changelogiem, integracja z Raycastem), marka podrzędna Eryk Sadowski.
+- **Szerzej:** Cleanpasta to samodzielny produkt, podpisany nazwiskiem autora (Eryk Sadowski), bez wspólnej nazwy-parasola. Ewentualne kolejne narzędzia dostają własne nazwy.
 
 ## 1. Decyzje architektoniczne
 
 | # | Decyzja | Dlaczego | Odrzucone |
 |---|---|---|---|
-| D1 | Jedno repo na produkt, plus `estools-docs` (brand, katalog) i później `estools-lib-core` | każdy produkt ma własne wydania i aktualizacje; `eryksadowski-tools` to katalog na jednorazowe zadania | `estools-tools` (typ `tools` = skrypty, nazwa "tools-tools") |
-| D2 | Osobne apki, nie launcher z pluginami | różne narzędzia, różne uprawnienia; launcherem jest już Raycast | launcher ES Tools |
+| D1 | Jedno repo na produkt (`cleanpasta-app`) | każdy produkt ma własne wydania i aktualizacje; `eryksadowski-tools` to katalog na jednorazowe zadania | wspólne repo na wszystkie narzędzia |
+| D2 | Osobne apki, nie launcher z pluginami | różne narzędzia, różne uprawnienia; launcherem jest już Raycast | własny launcher |
 | D3 | Cleanpasta = natywna apka AppKit + SwiftUI, w pasku menu; ikona w Docku tylko przy otwartym oknie ustawień lub aktualizacji | lekka, zawsze pod ręką, nie zaśmieca Docka | Electron, sam Raycast |
 | D4 | Konwersja: jedno źródło `converter/src/convert.ts` (do 15.10.2026 w repo Raycasta, R5), w apce przez JavaScriptCore z pliku `Resources/convert.js` (esbuild) | jedna logika i jedne testy dla Raycasta i apki | port do Swift (dwie implementacje do utrzymania) |
 | D5 | Schowek natywnie: NSPasteboard (HTML, web archive, RTF, tekst), wklejanie przez CGEvent Cmd+V po puszczeniu modyfikatorów | ten sam algorytm co w rozszerzeniu, sprawdzony w Mailu | Raycast Clipboard API |
 | D6 | Skróty globalne przez Carbon `RegisterEventHotKey`, własne pole do nagrywania skrótu | działa bez Dostępności i bez zależności | biblioteki zewnętrzne |
 | D7 | Start przy logowaniu przez `SMAppService.mainApp` | systemowy sposób od macOS 13 | LaunchAgent w plist |
 | D8 | Aktualizacje bez żadnych licencji: Sparkle 2 z darmowym podpisem EdDSA, `appcast.xml` jako asset GitHub Release, changelog w oknie aktualizacji, instalacja po zgodzie użytkownika (szczegóły w sekcji 2c) | aktualizacja pobrana przez samą apkę nie dostaje flagi kwarantanny, więc macOS jej nie blokuje; Apple Developer niepotrzebny | notaryzacja (płatna), ręczne pobieranie każdej wersji |
-| D9 | Repo apki publiczne | ES Tools jest open source (rejestr kodów); pliki aktualizacji muszą być do pobrania bez logowania | prywatne repo + osobny hosting |
-| D10 | Podpis darmowym, stałym certyfikatem "ES Tools Code Signing" (samopodpisany, ważny 10 lat, zrobiony lokalnie) | stały podpis = uprawnienie Dostępność przetrwa aktualizacje, a Sparkle sprawdza, że aktualizacja pochodzi od tego samego autora | podpis ad-hoc (Dostępność do ponownego włączenia po każdej wersji), Developer ID (płatne) |
+| D9 | Repo apki publiczne | Cleanpasta jest open source; pliki aktualizacji muszą być do pobrania bez logowania | prywatne repo + osobny hosting |
+| D10 | Podpis darmowym, stałym certyfikatem "Eryk Sadowski Code Signing" (samopodpisany, ważny 10 lat, zrobiony lokalnie) | stały podpis = uprawnienie Dostępność przetrwa aktualizacje, a Sparkle sprawdza, że aktualizacja pochodzi od tego samego autora | podpis ad-hoc (Dostępność do ponownego włączenia po każdej wersji), Developer ID (płatne) |
 | D11 | Build: Swift Package Manager + skrypt składający `.app` (Command Line Tools, Swift 5.10, SDK 14.4) | licencja Xcode nie jest zaakceptowana, a to wymaga `sudo` | projekt Xcode |
 | D12 | Minimum macOS 14 | JavaScriptCore z macOS 14 obsługuje wszystkie wyrażenia regularne konwertera (lookbehind, `\p{L}`) | macOS 13 |
-| D13 | UI po angielsku (brand ES Tools), instrukcja dla Maćka po polsku | zasada brandu; polska lokalizacja później | - |
+| D13 | UI po angielsku (brand Eryk Sadowski jako podpis), instrukcja dla Maćka po polsku | zasada brandu; polska lokalizacja później | - |
 | D14 | (zastąpione przez D20) | | |
 | D16 | Uniwersalność: jedna biblioteka `CleanpastaCore` (konwerter, schowek, opcje) używana przez apkę i przez CLI `cleanpasta`; testy wklejania nie tylko w Mailu, także Gmail (Chrome), Slack, Notatki, Pages, Word | narzędzie ma działać wszędzie, gdzie się wkleja, i w automatyzacji | logika zaszyta w apce |
 | D17 | CLI `cleanpasta` w paczce apki (`Contents/Helpers/cleanpasta`), instalowane z ustawień jednym kliknięciem jako link w `~/.local/bin` (bez hasła administratora) | Eryk, skrypty, Raycast Script Commands i agenci AI mogą czyścić i kopiować tekst bez klikania | osobna instalacja przez Homebrew (później) |
-| D18 | Skill AI `cleanpasta`: uczy Claude'a pisać drafty w Markdown i oddawać je przez `cleanpasta --copy`, żeby Eryk wklejał gotowy, sformatowany tekst; źródło prawdy od 26.10.2026 w `estools-skills` (plugin `estools`), kopia do dystrybucji w repo apki (`skills/cleanpasta`) | AI przygotowuje maile i wiadomości gotowe do wklejenia, bez ręcznego formatowania | instrukcje w CLAUDE.md |
-| D19 | Jedna ikona ES Tools w pasku menu: sygnet ES, pod nim sekcje narzędzi (dziś tylko Cleanpasta). Przy drugim narzędziu: wspólny rejestr w `~/Library/Application Support/ES Tools/`, pierwsza uruchomiona apka ES Tools pokazuje ikonę i menu wszystkich narzędzi, pozostałe chowają swoje; akcje przez schematy URL narzędzi (część `estools-lib-core`) | wiele narzędzi nie zaśmieca paska menu, marka jest jedna | osobna ikona każdego narzędzia |
-| D20 | Ikony apek ES Tools: duży sygnet ES w tle (jak w PDF-ach marki), znak narzędzia na środku w zieleni; wersja jasna domyślna, ciemna podmieniana w locie; propozycje w `design/proposals` (wybrana E) | spójna rodzina ikon, jedno narzędzie od drugiego odróżnia znak na środku | napis w ikonie |
-| D15 | Integracja z Raycastem: apka ma schemat URL `cleanpasta://paste`, `://repair`, `://settings`, `://about` (stary schemat z 1.0.x nadal działa, R2); rozszerzenie Raycasta zarchiwizowane (R5, R7) | Raycast może wywołać apkę jednym deeplinkiem | - |
+| D18 | Skill AI `cleanpasta`: uczy Claude'a pisać drafty w Markdown i oddawać je przez `cleanpasta --copy`, żeby Eryk wklejał gotowy, sformatowany tekst; źródło prawdy od 26.10.2026 w osobnym repo skilli, kopia do dystrybucji w repo apki (`skills/cleanpasta`) | AI przygotowuje maile i wiadomości gotowe do wklejenia, bez ręcznego formatowania | instrukcje w CLAUDE.md |
+| D19 | (zastąpione 07.11.2026) Jedna ikona wspólna dla wielu narzędzi odpada razem z nazwą-parasolem: ikona w pasku menu to prosty znak schowka | Cleanpasta jest samodzielnym produktem | wspólny rejestr i menu wielu narzędzi |
+| D20 | Ikona apki: zielony schowek na jasnym (domyślnie) lub ciemnym tle zaokrąglonego kwadratu, ciemna wersja podmieniana w locie; od 1.2.0 bez sygnetu w tle; propozycje w `design/proposals` | prosta, czytelna ikona | napis w ikonie |
+| D15 | Integracja z Raycastem: apka ma schemat URL `cleanpasta://paste`, `://repair`, `://settings`, `://about` (stary schemat z 1.0.x usunięty w 1.2.0, 6b); rozszerzenie Raycasta zarchiwizowane (R5, R7) | Raycast może wywołać apkę jednym deeplinkiem | - |
 
-## 2. Specyfikacja: ES Tools Cleanpasta (apka, od 1.0.0)
+## 2. Specyfikacja: Cleanpasta (apka, od 1.0.0)
 
 - **Pasek menu:** ikona schowka. Menu: Paste Clean (skrót), Repair Clipboard (skrót), Settings..., Check for Updates..., About Cleanpasta, Quit.
 - **Paste Clean** (domyślnie ⌃⌥⌘V): czyta schowek, czyści formatowanie, zapisuje wynik i sam wciska Cmd+V. Pusty schowek albo sam obraz lub plik: zwykłe Cmd+V. Brak Dostępności: czysty tekst zostaje w schowku i pojawia się podpowiedź.
@@ -44,7 +46,7 @@ Stan: 29.09.2026. Autor planu: Eryk Sadowski. Ten plik jest źródłem prawdy dl
   - General: Open at login, Show confirmation (podpowiedź na ekranie).
   - Updates: Check automatically, Check now, wersja.
   - Permission: status Dostępności i przycisk do Ustawień systemowych.
-  - Stopka: ES Tools by Eryk Sadowski · eryksadowski.com.
+  - Stopka: Eryk Sadowski · eryksadowski.com.
 - **Pierwsze uruchomienie:** otwiera ustawienia z sekcją powitalną i krokiem "Allow Accessibility".
 - **Prywatność:** brak telemetrii; sieć tylko do sprawdzania aktualizacji.
 - **General w ustawieniach:** także "Install command line tool" (link `cleanpasta` w `~/.local/bin`, z informacją o PATH).
@@ -76,16 +78,16 @@ Kody wyjścia: 0 ok, 1 błąd użycia, 2 nic do wyczyszczenia, 3 brak Dostępno�
 ## 2c. Instalacja i aktualizacje bez licencji
 
 - **Pierwsza instalacja, sposób 1 (polecany):** jedna komenda w Terminalu, skopiowana z README albo od Eryka:
-  `curl -fsSL https://github.com/iameryksadowski/estools-app-cleanpasta/releases/latest/download/install.sh | sh`.
+  `curl -fsSL https://github.com/iameryksadowski/cleanpasta-app/releases/latest/download/install.sh | sh`.
   Skrypt pobiera najnowszy zip, rozpakowuje do Aplikacji i uruchamia apkę. curl nie nadaje flagi kwarantanny, więc nie ma żadnego ostrzeżenia.
 - **Pierwsza instalacja, sposób 2:** DMG z przeglądarki, przeciągnij do Aplikacji, przy pierwszym uruchomieniu raz "Otwórz mimo to" w Ustawieniach systemowych (Prywatność i ochrona). Instrukcja ze zrzutami w DMG i w `docs/instalacja.md`.
 - **Aktualizacje:** apka raz dziennie sprawdza `appcast.xml`. Gdy jest nowa wersja, pokazuje okno z changelogiem i przyciskiem Install Update; pobiera, sprawdza podpis EdDSA, podmienia się i uruchamia ponownie. Bez ostrzeżeń macOS i bez ponownego nadawania Dostępności (stały certyfikat).
 - **Awaryjnie:** menu "Check for Updates..." i link do strony wydań; ręczna aktualizacja = przeciągnięcie nowej wersji do Aplikacji.
-- **Klucze:** prywatny klucz EdDSA i certyfikat "ES Tools Code Signing" żyją w pęku kluczy Eryka; kopie do 1Password (Eryk). Bez nich nie da się wydać aktualizacji, którą przyjmą zainstalowane apki.
+- **Klucze:** prywatny klucz EdDSA i certyfikat "Eryk Sadowski Code Signing" żyją w pęku kluczy Eryka; kopie do 1Password (Eryk). Bez nich nie da się wydać aktualizacji, którą przyjmą zainstalowane apki.
 - **Wydanie:** `scripts/release.sh` (lokalnie): build, podpis, zip, DMG, `install.sh`, appcast z changelogiem, GitHub Release. Później GitHub Actions po push na `main` z nową wersją (klucze jako sekrety repo).
 - **Wtyczka do Illustratora:** osobne, proste sprawdzanie wersji (plik z numerem wersji w GitHub Release i komunikat "jest nowa wersja, pobierz").
 
-## 3. Repo `estools-app-cleanpasta`
+## 3. Repo `cleanpasta-app`
 
 ```
 Package.swift                 SPM, zależność Sparkle
@@ -94,7 +96,7 @@ Sources/CleanpastaApp/        apka: main, AppDelegate, HotKeys, Preferences, Sho
                               SettingsView, AboutView, HUD, Updater, CLI installer
 Sources/CLI/                  CLI cleanpasta
 converter/                    konwerter TypeScript (convert.ts), testy jednostkowe i wklejania, lab WebKit
-skills/cleanpasta/            skill AI (kopia; źródło prawdy w estools-skills)
+skills/cleanpasta/            skill AI (kopia; źródło prawdy w osobnym repo skilli)
 Resources/convert.js          generowany z converter/ (scripts/build-converter.sh), commitowany
 Resources/AppIcon.icns        z design/icon.svg (scripts/make-icon.sh)
 Resources/Info.plist          szablon (wersja wstawiana przy budowie)
@@ -138,27 +140,27 @@ Każda faza kończy się commitem na `development` i spełnionymi kryteriami odb
 - **Odbiór:** DMG instaluje się na czystym koncie; Paste Clean działa w Mailu.
 
 ### F6. Aktualizacje
-- Certyfikat "ES Tools Code Signing" (samopodpisany), Sparkle 2, klucz EdDSA, `release.sh`, `install.sh`, appcast z changelogiem.
+- Certyfikat "Eryk Sadowski Code Signing" (samopodpisany), Sparkle 2, klucz EdDSA, `release.sh`, `install.sh`, appcast z changelogiem.
 - Repo na GitHubie (publiczne), Release 1.0.0 z DMG, zipem i appcast.xml.
 - GitHub Actions: wydanie po zmianie wersji na `main` (wymaga sekretu z kluczem EdDSA).
 - **Odbiór:** wersja 1.0.0 wykrywa testowe wydanie 1.0.1 i pokazuje changelog.
 
 ### F6b. Skill AI
-- `skills/cleanpasta/SKILL.md` (źródło prawdy: `estools-skills`, plugin `estools`), kopia w repo apki.
+- `skills/cleanpasta/SKILL.md` (źródło prawdy: osobne repo skilli), kopia w repo apki.
 - **Odbiór:** w nowej sesji Claude na prośbę "napisz maila do X i daj mi do wklejenia" kładzie sformatowany tekst do schowka przez `cleanpasta`.
 
 ### F7. Przekazanie Maćkowi
 - Paczka: DMG + instrukcja. Wysyła Eryk.
 
-### F8. Porządki ES Tools
-- `estools-docs`: brand (z `eryksadowski-tools/estools/brand`), katalog produktów, zasady wspólne.
-- `estools-plugin-illustrator-logo-export`: przeniesienie z historią (`git subtree split`).
+### F8. Porządki repozytoriów
+- Repo docs z brandem, katalogiem produktów i zasadami wspólnymi (dziś bez nazwy-parasola).
+- Wtyczka Illustrator Logo Export: przeniesienie z historią (`git subtree split`).
 - Wpisy w rejestrze nazw (`eryksadowski-docs`), README w `eryksadowski-tools` wskazuje nowe repo, PR `development` -> `main`.
 - Rozszerzenie Raycasta: link do apki w README.
 
 ### F9. Później
-- `estools-lib-core` (pakiet Swift) przy drugiej apce: ustawienia, aktualizacje, skróty, O aplikacji.
-- Developer ID i notaryzacja, polska lokalizacja, Raycast Store, strona ES Tools na eryksadowski.com.
+- Wspólny pakiet Swift przy drugiej apce: ustawienia, aktualizacje, skróty, O aplikacji.
+- Developer ID i notaryzacja, polska lokalizacja, Raycast Store, strona produktu na eryksadowski.com.
 
 ## 5. Ryzyka
 
@@ -172,7 +174,7 @@ Każda faza kończy się commitem na `development` i spełnionymi kryteriami odb
 ## 6. Decyzje dla Eryka (nie blokują pracy)
 
 1. Kopie klucza EdDSA i certyfikatu do 1Password (po F6).
-2. Publiczne repo apki: zgodne z "ES Tools = open source"; bez tego aktualizacje u Maćka nie zadziałają.
+2. Publiczne repo apki: zgodne z zasadą open source; bez tego aktualizacje u Maćka nie zadziałają.
 3. Domyślny skrót Paste Clean ⌃⌥⌘V.
 4. Polska lokalizacja interfejsu.
 
@@ -182,8 +184,8 @@ Eryk: cała apka nazywa się "Cleanpasta", aktualizacja ma przenieść istnieją
 
 | # | Decyzja | Dlaczego |
 |---|---|---|
-| R1 | Nazwa wszędzie: apka "Cleanpasta" (produkt "ES Tools Cleanpasta"), plik `Cleanpasta.app`, CLI `cleanpasta`, link `cleanpasta://`, repo `estools-app-cleanpasta`, skill `cleanpasta` | jedna nazwa produktu od A do Z |
-| R2 | Identyfikator pakietu bez zmian (`com.eryksadowski.estools.cleanpaste`), stary link `estools-clean-paste://` nadal działa | Sparkle podmienia apkę tylko przy tym samym identyfikatorze; zostają Dostępność, ustawienia i skróty; stare Quicklinki w Raycaście dalej działają |
+| R1 | Nazwa wszędzie: apka "Cleanpasta", plik `Cleanpasta.app`, CLI `cleanpasta`, link `cleanpasta://`, repo `cleanpasta-app` (od 1.2.0; wcześniej `estools-app-cleanpasta`), skill `cleanpasta` | jedna nazwa produktu od A do Z |
+| R2 | (zastąpione w 1.2.0, 6b) Identyfikator pakietu bez zmian, stary link `estools-clean-paste://` nadal działa | Sparkle podmienia apkę tylko przy tym samym identyfikatorze; zostają Dostępność, ustawienia i skróty; stare Quicklinki w Raycaście dalej działają |
 | R3 | Po aktualizacji apka sama zmienia nazwę pliku z `Clean Paste.app` na `Cleanpasta.app` i przepina link CLI | Sparkle zostawia starą nazwę pliku |
 | R4 | GitHub przekierowuje stare adresy po zmianie nazwy repo, więc zainstalowane 1.0.x znajdą aktualizację; nowa wersja ma już nowy adres appcastu | brak ręcznej reinstalacji u prezesa |
 | R5 | Konwerter (`convert.ts`, testy, fixture'y, lab WebKit) przenosi się do repo apki (`converter/`, pnpm); rozszerzenie Raycasta zostaje zarchiwizowane | jeden produkt, jedno źródło logiki |
@@ -193,6 +195,21 @@ Eryk: cała apka nazywa się "Cleanpasta", aktualizacja ma przenieść istnieją
 
 Wydanie: 1.1.0. Sprzątanie na Macu Eryka: stare rozszerzenie Raycasta (do Kosza), stary link `cleanpaste`, plik importu w Pobranych, stary skill `clean-paste` na claude.ai wyłączony.
 
+## 6b. 1.2.0 - rezygnacja z nazwy ES Tools (07.11.2026)
+
+Eryk: nazwa-parasol "ES Tools" odpada wszędzie, także z identyfikatorów technicznych. Aplikacja to po prostu "Cleanpasta", a "Eryk Sadowski" jest podpisem (O aplikacji, stopka), nigdy częścią nazwy. Nikt poza Erykiem nie dostał jeszcze Cleanpasty, więc zmieniamy wszystko bez zgodności wstecznej dla innych użytkowników.
+
+| # | Decyzja | Dlaczego |
+|---|---|---|
+| N1 | Identyfikator pakietu `com.eryksadowski.cleanpasta` (CLI: `com.eryksadowski.cleanpasta.cli`); przy starcie apka raz kopiuje ustawienia ze starej domeny `com.eryksadowski.estools.cleanpaste` (komentarz "legacy migration"), starej domeny nie kasuje | ustawienia Eryka zostają; inni użytkownicy nie istnieją |
+| N2 | Schemat `estools-clean-paste://` usunięty, zostaje `cleanpasta://` | brak starych linków poza Erykiem |
+| N3 | Certyfikat "Eryk Sadowski Code Signing", folder kluczy `~/.config/eryksadowski/signing`, wpis 1Password "Cleanpasta signing"; klucz publiczny EdDSA bez zmian | spójna nazwa bez ES Tools; certyfikat tworzy Eryk (`scripts/setup-signing.sh`) |
+| N4 | Repo `iameryksadowski/cleanpasta-app` (zmiana nazwy z `estools-app-cleanpasta`) | nazwa wg konwencji `[produkt]-[typ]` |
+| N5 | Windows: identyfikator `com.eryksadowski.cleanpasta`, ustawienia w `%APPDATA%\cleanpasta`, CLI w `%LOCALAPPDATA%\Cleanpasta\bin`, nagłówek bez wordmarku | Windows nigdy nie wydany |
+| N6 | Ikona apki bez sygnetu w tle, ikona w pasku menu to schowek; z O aplikacji znika sekcja nazwy-parasola | brak wspólnej marki narzędzi |
+
+Wydanie: 1.2.0 (pierwsze z nowym identyfikatorem i certyfikatem; na Macu Eryka lepiej zainstalować je ręcznie niż liczyć na aktualizację z 1.1.x, bo zmieniają się identyfikator i podpis).
+
 ## 7. Status (01.10.2026)
 
 - [x] F0 Plan
@@ -201,10 +218,10 @@ Wydanie: 1.1.0. Sprzątanie na Macu Eryka: stare rozszerzenie Raycasta (do Kosza
 - [x] F3 Interfejs (pasek menu z sygnetem ES, okno ustawień, Dock tylko przy oknie - sprawdzone, HUD, schemat URL - Repair sprawdzony na żywo)
 - [x] F4 Ikona i brand (wariant E: sygnet w tle, zielony schowek; jasna domyślnie, ciemna w locie)
 - [x] F5 Paczka (universal .app, zip, DMG, instrukcja PL; podpis ad-hoc do czasu F6)
-- [x] F6 Aktualizacje - repo publiczne, certyfikat "ES Tools Code Signing" w pęku kluczy, klucz EdDSA w pliku, kopie w 1Password (Sadowscy > Work > "ES Tools - Cleanpasta signing", ta sama nazwa co w `scripts/release.sh`); Release v1.0.0 opublikowany, komenda instalacyjna sprawdzona; aktualizacja 1.0.0 -> 1.0.1 sprawdzona lokalnie. Do zrobienia: wydanie automatycznie z GitHub Actions po zmianie wersji na `main`
-- [x] F6b Skill AI (wgrany na claude.ai; od 1.1.0 jako `cleanpasta`, od 26.10.2026 w pluginie `estools`)
+- [x] F6 Aktualizacje - repo publiczne, certyfikat "Eryk Sadowski Code Signing" (od 1.2.0; wcześniej inna nazwa) w pęku kluczy, klucz EdDSA w pliku, kopie w 1Password (Sadowscy > Work > "Cleanpasta signing", ta sama nazwa co w `scripts/release.sh`); Release v1.0.0 opublikowany, komenda instalacyjna sprawdzona; aktualizacja 1.0.0 -> 1.0.1 sprawdzona lokalnie. Do zrobienia: wydanie automatycznie z GitHub Actions po zmianie wersji na `main`
+- [x] F6b Skill AI (wgrany na claude.ai; od 1.1.0 jako `cleanpasta`, od 26.10.2026 w osobnym repo skilli)
 - [x] F7 Przekazanie Maćkowi - DMG 1.0.0 z PDF "Jak zainstalować" oddany Erykowi (01.10)
-- [x] F8 Porządki ES Tools (`estools-docs` z historią brandu, Logo Export z historią z powrotem w swoim repo, rejestr nazw) - PR-y zmergowane
+- [x] F8 Porządki repozytoriów (repo docs z historią brandu, Logo Export z historią z powrotem w swoim repo, rejestr nazw) - PR-y zmergowane
 - [x] F10 Cleanpasta (zmiana nazwy, listy numerowane, Raycast z ustawień, skróty do usunięcia, porządek) - 1.1.0, migracja instalacji 1.0.x sprawdzona lokalnie
 - [ ] F9 Później
 

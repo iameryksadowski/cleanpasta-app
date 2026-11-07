@@ -4,7 +4,7 @@ Status: implementation preview on `feature/windows`, targeting `development`; ar
 
 ## Architecture decision
 
-Keep one repository per ES Tools product and one shared development/release history. Platform feature branches are temporary integration branches, never separate maintained products. The native Swift macOS app stays at the repository root. Windows lives in `windows/`, using Tauri 2 and Rust; the Windows webview renders settings only. Clipboard text is converted in Rust's embedded JS engine, not in the settings webview.
+Keep one repository for the product and one shared development/release history. Platform feature branches are temporary integration branches, never separate maintained products. The native Swift macOS app stays at the repository root. Windows lives in `windows/`, using Tauri 2 and Rust; the Windows webview renders settings only. Clipboard text is converted in Rust's embedded JS engine, not in the settings webview.
 
 `converter/src/convert.ts` remains the only converter source. Its committed `Resources/convert.js` bundle is embedded directly with `include_str!` by `windows/crates/cleanpasta-core`, with no copied implementation or Node runtime on the user's machine. macOS executes the same bundle in JavaScriptCore. Both the Tauri app and `cleanpasta.exe` call this core. `cleanpasta-platform` owns clipboard access, preferences, SendInput and per-user PATH setup.
 
@@ -52,9 +52,9 @@ Deep links: `cleanpasta://paste`, `cleanpasta://repair`, `cleanpasta://settings`
 
 ## Preferences and CLI
 
-App and CLI share `%APPDATA%\estools-cleanpasta\settings.json`. Formatting defaults are replace dashes, replace quotes and 12 px. The CLI implements the flags in `Sources/CLI/main.swift`, including `--json-input`, `--md`, `--body`, explicit `--print` with copying, and exit codes 0/1/2/3. Windows code 3 means clipboard prepared but simulated paste failed; it is the Windows equivalent of the macOS Accessibility failure. The Windows help describes Ctrl+V and Windows permissions.
+App and CLI share `%APPDATA%\cleanpasta\settings.json`. Formatting defaults are replace dashes, replace quotes and 12 px. The CLI implements the flags in `Sources/CLI/main.swift`, including `--json-input`, `--md`, `--body`, explicit `--print` with copying, and exit codes 0/1/2/3. Windows code 3 means clipboard prepared but simulated paste failed; it is the Windows equivalent of the macOS Accessibility failure. The Windows help describes Ctrl+V and Windows permissions.
 
-Settings > General > Install to user PATH copies the bundled CLI to `%LOCALAPPDATA%\ES Tools\Cleanpasta\bin\cleanpasta.exe` and appends that directory to the current user's PATH, preserving existing environment variable references. It uses HKCU only and broadcasts the environment change. Open a new terminal afterwards. Reinstall the CLI from settings after app updates to refresh this standalone copy. Uninstalling the preview does not remove this optional copy or its user PATH entry; remove that entry and folder manually if no longer needed. No administrator access or system PATH edits are needed.
+Settings > General > Install to user PATH copies the bundled CLI to `%LOCALAPPDATA%\Cleanpasta\bin\cleanpasta.exe` and appends that directory to the current user's PATH, preserving existing environment variable references. It uses HKCU only and broadcasts the environment change. Open a new terminal afterwards. Reinstall the CLI from settings after app updates to refresh this standalone copy. Uninstalling the preview does not remove this optional copy or its user PATH entry; remove that entry and folder manually if no longer needed. No administrator access or system PATH edits are needed.
 
 Autostart uses Tauri's per-user autostart integration. Closing settings hides the window and leaves the tray process running; Quit exits it. The settings webview loads bundled Geist fonts, starts light, and offers a persistent dark-mode switch. Icons derive from `design/icon-1024.png` and the existing dark asset; the tray follows the OS theme. No telemetry is present.
 

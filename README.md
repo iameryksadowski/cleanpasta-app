@@ -1,6 +1,6 @@
-![ES Tools](design/icon-1024.png)
+![Cleanpasta](design/icon-1024.png)
 
-# ES Tools Cleanpasta
+# Cleanpasta
 
 A menu bar app for macOS that pastes formatted text without the background, colors and fonts it was copied with. Bold, italic, links, lists, line breaks and non-breaking spaces stay, and the text takes the style of wherever you paste it: Mail, Gmail, Slack, Notes, Word or any other app.
 
@@ -18,16 +18,16 @@ A menu bar app for macOS that pastes formatted text without the background, colo
 ## Install
 
 ```bash
-curl -fsSL https://github.com/iameryksadowski/estools-app-cleanpasta/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/iameryksadowski/cleanpasta-app/releases/latest/download/install.sh | sh
 ```
 
-Or download the DMG from [Releases](https://github.com/iameryksadowski/estools-app-cleanpasta/releases/latest), drag Cleanpasta to Applications and allow it once in System Settings > Privacy & Security ("Open Anyway"). Then allow Accessibility when the app asks: Cleanpasta presses Cmd+V for you. Requires macOS 14 or later. Polish guide: [docs/instalacja.md](docs/instalacja.md).
+Or download the DMG from [Releases](https://github.com/iameryksadowski/cleanpasta-app/releases/latest), drag Cleanpasta to Applications and allow it once in System Settings > Privacy & Security ("Open Anyway"). Then allow Accessibility when the app asks: Cleanpasta presses Cmd+V for you. Requires macOS 14 or later. Polish guide: [docs/instalacja.md](docs/instalacja.md).
 
 ## Windows preview
 
 A Windows tray app and `cleanpasta.exe` CLI are being developed in the same repository, under `windows/`. They use Tauri 2 and an embedded QuickJS engine running the same converter bundle as macOS, without Node on the user's machine.
 
-Download the `cleanpasta-windows-x64-preview` artifact from a successful [Windows workflow run](https://github.com/iameryksadowski/estools-app-cleanpasta/actions/workflows/windows.yml). It contains a per-user NSIS installer and the CLI. This is an unsigned test build; SmartScreen or organizational policies may warn or block it. It is not a published release.
+Download the `cleanpasta-windows-x64-preview` artifact from a successful [Windows workflow run](https://github.com/iameryksadowski/cleanpasta-app/actions/workflows/windows.yml). It contains a per-user NSIS installer and the CLI. This is an unsigned test build; SmartScreen or organizational policies may warn or block it. It is not a published release.
 
 Paste Clean defaults to Ctrl+Alt+Shift+V. The tray also offers Repair Clipboard, Settings, About and Quit. Settings include formatting, shortcuts, autostart and CLI installation to the user PATH. Signed updates require Eryk's public key and feed before release. Architecture, build commands, signing choices and the manual test checklist: [docs/windows.md](docs/windows.md).
 
@@ -49,7 +49,7 @@ cleanpasta --repair                     # fix the clipboard, then paste anywhere
 
 The cleaning logic lives in `converter/` (TypeScript, with unit tests and paste tests in the WebKit editor behind the Apple Mail compose window); it is bundled into `Resources/convert.js` and runs in JavaScriptCore, so the app and the CLI clean text the same way. The clipboard is read natively (HTML, web archive, RTF, plain text) and written back as HTML and plain text; Cmd+V is sent after the shortcut's modifier keys are released, so Mail never turns it into Paste and Match Style.
 
-Updates use [Sparkle](https://sparkle-project.org) with an EdDSA signature; the app is signed with the "ES Tools Code Signing" certificate, so Accessibility stays allowed across updates. No Apple developer account is involved.
+Updates use [Sparkle](https://sparkle-project.org) with an EdDSA signature; the app is signed with the "Eryk Sadowski Code Signing" certificate, so Accessibility stays allowed across updates. No Apple developer account is involved.
 
 ## Development
 
@@ -65,4 +65,4 @@ Updates use [Sparkle](https://sparkle-project.org) with an EdDSA signature; the 
 
 ---
 
-ES Tools by Eryk Sadowski · eryksadowski.com
+Eryk Sadowski · eryksadowski.com

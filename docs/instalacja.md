@@ -16,7 +16,7 @@ Cleanpasta wkleja tekst bez tła, kolorów i obcych fontów. Zostają pogrubieni
 1. Otwórz aplikację Terminal (Cmd+Spacja, wpisz "Terminal", Enter).
 2. Wklej poniższą linię i naciśnij Enter:
 
-   curl -fsSL https://github.com/iameryksadowski/estools-app-cleanpasta/releases/latest/download/install.sh | sh
+   curl -fsSL https://github.com/iameryksadowski/cleanpasta-app/releases/latest/download/install.sh | sh
 
 3. Gotowe: Cleanpasta jest w Aplikacjach i działa. Ikona pojawia się w pasku menu u góry ekranu.
 
@@ -52,4 +52,4 @@ Ikona w pasku menu > Quit Cleanpasta, potem przeciągnij Cleanpasta z Aplikacji 
 
 ---
 
-ES Tools by Eryk Sadowski · eryksadowski.com
+Eryk Sadowski · eryksadowski.com
