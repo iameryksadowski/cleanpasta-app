@@ -59,7 +59,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     // cleanpasta://paste, ://repair, ://settings, ://about (Raycast, scripts)
     func application(_ application: NSApplication, open urls: [URL]) {
-        for url in urls where ["cleanpasta", "estools-clean-paste"].contains(url.scheme ?? "") { // legacy migration: the second scheme keeps links made before 1.1.0 working
+        for url in urls where url.scheme == "cleanpasta" {
             switch url.host ?? url.path.trimmingCharacters(in: CharacterSet(charactersIn: "/")) {
             case "paste": pasteClean(delay: 0.35) // let a launcher (Raycast) close and the target app come back
             case "repair": repairClipboard()
@@ -127,7 +127,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     lazy var about = AboutWindowController(updater: updater)
 
-    /// The tool, ES Tools, the author and the version, in one window.
+    /// The tool, the author and the version, in one window.
     @objc func showAbout() { about.show() }
 
     static var versionTitle: String {
@@ -145,7 +145,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             image.isTemplate = true
             item.button?.image = image
         }
-        item.button?.toolTip = "ES Tools"
+        item.button?.toolTip = "Cleanpasta"
         let menu = NSMenu()
         menu.delegate = self
         item.menu = menu
@@ -154,7 +154,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
-        // One ES Tools icon in the menu bar; each tool is a section under it.
+        // One icon in the menu bar; the menu below it holds the commands.
         menu.addItem(.sectionHeader(title: "Cleanpasta"))
         let paste = NSMenuItem(title: "Paste Clean", action: #selector(pasteCleanFromMenu), keyEquivalent: "")
         apply(preferences.pasteCleanShortcut, to: paste)
@@ -327,5 +327,26 @@ enum Migration {
             try? SMAppService.mainApp.register()
         }
         defaults.set(true, forKey: "migratedToCleanpasta")
+    }
+}
+
+/// Legacy migration of the settings to the new defaults domain (1.2.0 renamed the bundle identifier).
+/// Copies the app's own keys once, when the new domain is still empty. The old domain stays untouched.
+enum LegacyDefaults {
+    static let oldDomain = "com.eryksadowski.estools.cleanpaste" // legacy migration
+    static let newDomain = "com.eryksadowski.cleanpasta"
+    static let keys = [
+        "replaceDashes", "replaceQuotes", "fontSize", "pasteCleanShortcut", "repairShortcut",
+        "showFeedback", "launchedBefore", "accessibilityWasAllowed", "migratedToCleanpasta",
+    ]
+
+    static func migrateIfNeeded() {
+        let defaults = UserDefaults.standard
+        let domain = Bundle.main.bundleIdentifier ?? newDomain
+        guard domain == newDomain, defaults.persistentDomain(forName: domain)?.isEmpty ?? true else { return }
+        guard let old = defaults.persistentDomain(forName: oldDomain), !old.isEmpty else { return }
+        for key in keys {
+            if let value = old[key] { defaults.set(value, forKey: key) }
+        }
     }
 }

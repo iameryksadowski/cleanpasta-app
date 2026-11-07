@@ -205,7 +205,7 @@ struct SettingsView: View {
                 Text("Permission")
             } footer: {
                 HStack {
-                    Text("ES Tools by Eryk Sadowski")
+                    Text("Eryk Sadowski")
                     Spacer()
                     Link("eryksadowski.com", destination: URL(string: "https://eryksadowski.com")!)
                 }

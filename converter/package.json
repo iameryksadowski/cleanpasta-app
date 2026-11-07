@@ -1,7 +1,7 @@
 {
   "name": "cleanpasta-converter",
   "private": true,
-  "description": "ES Tools Cleanpasta converter: clipboard HTML, RTF and Markdown to clean Apple Mail markup. Bundled into Resources/convert.js for the app and the CLI.",
+  "description": "Cleanpasta converter: clipboard HTML, RTF and Markdown to clean Apple Mail markup. Bundled into Resources/convert.js for the app and the CLI.",
   "type": "module",
   "license": "MIT",
   "scripts": {

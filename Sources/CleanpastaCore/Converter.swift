@@ -25,7 +25,7 @@ public struct CleanResult: Equatable {
 }
 
 /// Runs the converter shared with the Raycast extension (Resources/convert.js, built
-/// from src/lib/convert.ts) in JavaScriptCore, so every ES Tools Cleanpasta product
+/// from src/lib/convert.ts) in JavaScriptCore, so every Cleanpasta product
 /// cleans text the same way.
 public final class Converter {
     public static let shared = Converter()

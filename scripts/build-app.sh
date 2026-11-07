@@ -1,7 +1,7 @@
 #!/bin/sh
 # Builds dist/Cleanpasta.app (menu bar app + cleanpasta CLI + Sparkle), signs it, and
 # packs dist/Cleanpasta-VERSION.zip and dist/Cleanpasta-VERSION.dmg.
-# Signing: the "ES Tools Code Signing" certificate when it is in the keychain
+# Signing: the "Eryk Sadowski Code Signing" certificate when it is in the keychain
 # (scripts/setup-signing.sh), otherwise ad-hoc.
 set -eu
 cd "$(dirname "$0")/.."
@@ -11,7 +11,7 @@ BUILD="${BUILD:-$(git rev-list --count HEAD 2>/dev/null || echo 1)}"
 DIST="${DIST:-dist}"
 [ -n "$VERSION" ] || { echo "No version in CHANGELOG.md" >&2; exit 1; }
 APP="$DIST/Cleanpasta.app"
-IDENTITY="${CODE_SIGN_IDENTITY:-ES Tools Code Signing}"
+IDENTITY="${CODE_SIGN_IDENTITY:-Eryk Sadowski Code Signing}"
 if [ "$IDENTITY" != "-" ]; then
   security find-certificate -c "$IDENTITY" >/dev/null 2>&1 || {
     [ "${REQUIRE_SIGNING:-0}" != "1" ] || { echo "Release signing certificate not found: $IDENTITY" >&2; exit 1; }
@@ -19,7 +19,7 @@ if [ "$IDENTITY" != "-" ]; then
   }
 fi
 if [ "${REQUIRE_SIGNING:-0}" = "1" ] && [ "$IDENTITY" = "-" ]; then
-  echo "A release requires the ES Tools Code Signing identity; ad-hoc signing is not allowed." >&2
+  echo "A release requires the Eryk Sadowski Code Signing identity; ad-hoc signing is not allowed." >&2
   exit 1
 fi
 PUBLIC_KEY="$(cat Resources/sparkle-public-key.txt 2>/dev/null || true)"
@@ -45,7 +45,7 @@ mkdir -p "$DIST"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/Helpers" "$APP/Contents/Frameworks"
 cp "$BIN/CleanpastaApp" "$APP/Contents/MacOS/CleanpastaApp"
 cp "$BIN/cleanpasta" "$APP/Contents/Helpers/cleanpasta"
-cp Resources/convert.js Resources/AppIcon.icns Resources/AppIcon-dark.png Resources/MenuBarIcon.png Resources/MenuBarIcon@2x.png Resources/estools-wordmark-dark.png Resources/estools-wordmark-light.png Resources/SadowskiWordmark-white.png "$APP/Contents/Resources/"
+cp Resources/convert.js Resources/AppIcon.icns Resources/AppIcon-dark.png Resources/MenuBarIcon.png Resources/MenuBarIcon@2x.png Resources/SadowskiWordmark-white.png "$APP/Contents/Resources/"
 sed -e "s/__VERSION__/$VERSION/" -e "s/__BUILD__/$BUILD/" -e "s|__SU_PUBLIC_ED_KEY__|$PUBLIC_KEY|" Resources/Info.plist > "$APP/Contents/Info.plist"
 if [ -z "$PUBLIC_KEY" ]; then
   # no update key yet: leave the updater off in this build
@@ -60,8 +60,8 @@ sign() { codesign --force --timestamp=none --sign "$IDENTITY" "$@"; }
 sign "$APP/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app"
 sign "$APP/Contents/Frameworks/Sparkle.framework/Versions/B/Autoupdate"
 sign "$APP/Contents/Frameworks/Sparkle.framework"
-# Identifier follows the app's bundle identifier, kept from 1.0.x for update continuity.
-sign --identifier com.eryksadowski.estools.cleanpaste.cli "$APP/Contents/Helpers/cleanpasta"
+# Identifier follows the app's bundle identifier.
+sign --identifier com.eryksadowski.cleanpasta.cli "$APP/Contents/Helpers/cleanpasta"
 sign "$APP"
 codesign --verify --deep --strict "$APP"
 echo "Signed with: $IDENTITY"

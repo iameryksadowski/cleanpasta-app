@@ -70,7 +70,6 @@ function setTheme(dark) {
   document.documentElement.dataset.theme = dark ? "dark" : "light";
   $("theme").setAttribute("aria-pressed", String(dark));
   $("theme").textContent = dark ? "Light mode" : "Dark mode";
-  $("wordmark").src = dark ? "wordmark-light.svg" : "wordmark.svg";
   localStorage.setItem("theme", dark ? "dark" : "light");
 }
 $("theme").onclick = () => setTheme(document.documentElement.dataset.theme !== "dark");

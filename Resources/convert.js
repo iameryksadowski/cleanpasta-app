@@ -1,4 +1,4 @@
-/* ES Tools Cleanpasta converter - generated from converter/src/convert.ts (repo @be253bb) by scripts/build-converter.sh. Do not edit. */
+/* Cleanpasta converter - generated from converter/src/convert.ts (repo @be253bb) by scripts/build-converter.sh. Do not edit. */
 (() => {
   // converter/node_modules/.pnpm/entities@8.1.0/node_modules/entities/dist/decode-codepoint.js
   var c1 = [

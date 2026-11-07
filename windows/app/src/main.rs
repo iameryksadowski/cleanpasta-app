@@ -311,7 +311,7 @@ fn main() {
             let icon = tauri::image::Image::from_bytes(icon_bytes)?;
             TrayIconBuilder::with_id("cleanpasta")
                 .icon(icon)
-                .tooltip("ES Tools Cleanpasta")
+                .tooltip("Cleanpasta")
                 .menu(&menu)
                 .on_tray_icon_event(|tray, event| {
                     if let tauri::tray::TrayIconEvent::Click {
@@ -368,5 +368,5 @@ fn main() {
             Ok(())
         })
         .run(tauri::generate_context!())
-        .expect("Could not start ES Tools Cleanpasta");
+        .expect("Could not start Cleanpasta");
 }
