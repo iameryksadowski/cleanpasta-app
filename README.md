@@ -49,7 +49,7 @@ cleanpasta --repair                     # fix the clipboard, then paste anywhere
 
 The cleaning logic lives in `converter/` (TypeScript, with unit tests and paste tests in the WebKit editor behind the Apple Mail compose window); it is bundled into `Resources/convert.js` and runs in JavaScriptCore, so the app and the CLI clean text the same way. The clipboard is read natively (HTML, web archive, RTF, plain text) and written back as HTML and plain text; Cmd+V is sent after the shortcut's modifier keys are released, so Mail never turns it into Paste and Match Style.
 
-Updates use [Sparkle](https://sparkle-project.org) with an EdDSA signature; the app is signed with the "Eryk Sadowski Code Signing" certificate, so Accessibility stays allowed across updates. No Apple developer account is involved.
+Updates use [Sparkle](https://sparkle-project.org) with an EdDSA signature; the app is signed with the "Eryk Sadowski" certificate, so Accessibility stays allowed across updates. No Apple developer account is involved.
 
 ## Development
 

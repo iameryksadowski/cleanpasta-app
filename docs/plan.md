@@ -22,7 +22,7 @@ Stan: 29.09.2026, uzupełniony 07.11.2026. Autor planu: Eryk Sadowski. Ten plik 
 | D7 | Start przy logowaniu przez `SMAppService.mainApp` | systemowy sposób od macOS 13 | LaunchAgent w plist |
 | D8 | Aktualizacje bez żadnych licencji: Sparkle 2 z darmowym podpisem EdDSA, `appcast.xml` jako asset GitHub Release, changelog w oknie aktualizacji, instalacja po zgodzie użytkownika (szczegóły w sekcji 2c) | aktualizacja pobrana przez samą apkę nie dostaje flagi kwarantanny, więc macOS jej nie blokuje; Apple Developer niepotrzebny | notaryzacja (płatna), ręczne pobieranie każdej wersji |
 | D9 | Repo apki publiczne | Cleanpasta jest open source; pliki aktualizacji muszą być do pobrania bez logowania | prywatne repo + osobny hosting |
-| D10 | Podpis darmowym, stałym certyfikatem "Eryk Sadowski Code Signing" (samopodpisany, ważny 10 lat, zrobiony lokalnie) | stały podpis = uprawnienie Dostępność przetrwa aktualizacje, a Sparkle sprawdza, że aktualizacja pochodzi od tego samego autora | podpis ad-hoc (Dostępność do ponownego włączenia po każdej wersji), Developer ID (płatne) |
+| D10 | Podpis darmowym, stałym certyfikatem "Eryk Sadowski" (samopodpisany, ważny 10 lat, zrobiony lokalnie) | stały podpis = uprawnienie Dostępność przetrwa aktualizacje, a Sparkle sprawdza, że aktualizacja pochodzi od tego samego autora | podpis ad-hoc (Dostępność do ponownego włączenia po każdej wersji), Developer ID (płatne) |
 | D11 | Build: Swift Package Manager + skrypt składający `.app` (Command Line Tools, Swift 5.10, SDK 14.4) | licencja Xcode nie jest zaakceptowana, a to wymaga `sudo` | projekt Xcode |
 | D12 | Minimum macOS 14 | JavaScriptCore z macOS 14 obsługuje wszystkie wyrażenia regularne konwertera (lookbehind, `\p{L}`) | macOS 13 |
 | D13 | UI po angielsku (brand Eryk Sadowski jako podpis), instrukcja dla Maćka po polsku | zasada brandu; polska lokalizacja później | - |
@@ -83,7 +83,7 @@ Kody wyjścia: 0 ok, 1 błąd użycia, 2 nic do wyczyszczenia, 3 brak Dostępno�
 - **Pierwsza instalacja, sposób 2:** DMG z przeglądarki, przeciągnij do Aplikacji, przy pierwszym uruchomieniu raz "Otwórz mimo to" w Ustawieniach systemowych (Prywatność i ochrona). Instrukcja ze zrzutami w DMG i w `docs/instalacja.md`.
 - **Aktualizacje:** apka raz dziennie sprawdza `appcast.xml`. Gdy jest nowa wersja, pokazuje okno z changelogiem i przyciskiem Install Update; pobiera, sprawdza podpis EdDSA, podmienia się i uruchamia ponownie. Bez ostrzeżeń macOS i bez ponownego nadawania Dostępności (stały certyfikat).
 - **Awaryjnie:** menu "Check for Updates..." i link do strony wydań; ręczna aktualizacja = przeciągnięcie nowej wersji do Aplikacji.
-- **Klucze:** prywatny klucz EdDSA i certyfikat "Eryk Sadowski Code Signing" żyją w pęku kluczy Eryka; kopie do 1Password (Eryk). Bez nich nie da się wydać aktualizacji, którą przyjmą zainstalowane apki.
+- **Klucze:** prywatny klucz EdDSA i certyfikat "Eryk Sadowski" żyją w pęku kluczy Eryka; kopie do 1Password (Eryk). Bez nich nie da się wydać aktualizacji, którą przyjmą zainstalowane apki.
 - **Wydanie:** `scripts/release.sh` (lokalnie): build, podpis, zip, DMG, `install.sh`, appcast z changelogiem, GitHub Release. Później GitHub Actions po push na `main` z nową wersją (klucze jako sekrety repo).
 - **Wtyczka do Illustratora:** osobne, proste sprawdzanie wersji (plik z numerem wersji w GitHub Release i komunikat "jest nowa wersja, pobierz").
 
@@ -140,7 +140,7 @@ Każda faza kończy się commitem na `development` i spełnionymi kryteriami odb
 - **Odbiór:** DMG instaluje się na czystym koncie; Paste Clean działa w Mailu.
 
 ### F6. Aktualizacje
-- Certyfikat "Eryk Sadowski Code Signing" (samopodpisany), Sparkle 2, klucz EdDSA, `release.sh`, `install.sh`, appcast z changelogiem.
+- Certyfikat "Eryk Sadowski" (samopodpisany), Sparkle 2, klucz EdDSA, `release.sh`, `install.sh`, appcast z changelogiem.
 - Repo na GitHubie (publiczne), Release 1.0.0 z DMG, zipem i appcast.xml.
 - GitHub Actions: wydanie po zmianie wersji na `main` (wymaga sekretu z kluczem EdDSA).
 - **Odbiór:** wersja 1.0.0 wykrywa testowe wydanie 1.0.1 i pokazuje changelog.
@@ -203,7 +203,7 @@ Eryk: nazwa-parasol "ES Tools" odpada wszędzie, także z identyfikatorów techn
 |---|---|---|
 | N1 | Identyfikator pakietu `com.eryksadowski.cleanpasta` (CLI: `com.eryksadowski.cleanpasta.cli`); przy starcie apka raz kopiuje ustawienia ze starej domeny `com.eryksadowski.estools.cleanpaste` (komentarz "legacy migration"), starej domeny nie kasuje | ustawienia Eryka zostają; inni użytkownicy nie istnieją |
 | N2 | Schemat `estools-clean-paste://` usunięty, zostaje `cleanpasta://` | brak starych linków poza Erykiem |
-| N3 | Certyfikat "Eryk Sadowski Code Signing", folder kluczy `~/.config/eryksadowski/signing`, wpis 1Password "Cleanpasta signing"; klucz publiczny EdDSA bez zmian | spójna nazwa bez ES Tools; certyfikat tworzy Eryk (`scripts/setup-signing.sh`) |
+| N3 | Certyfikat "Eryk Sadowski", folder kluczy `~/.config/eryksadowski/signing`, wpis 1Password "Cleanpasta signing"; klucz publiczny EdDSA bez zmian | spójna nazwa bez ES Tools; certyfikat tworzy Eryk (`scripts/setup-signing.sh`) |
 | N4 | Repo `iameryksadowski/cleanpasta-app` (zmiana nazwy z `estools-app-cleanpasta`) | nazwa wg konwencji `[produkt]-[typ]` |
 | N5 | Windows: identyfikator `com.eryksadowski.cleanpasta`, ustawienia w `%APPDATA%\cleanpasta`, CLI w `%LOCALAPPDATA%\Cleanpasta\bin`, nagłówek bez wordmarku | Windows nigdy nie wydany |
 | N6 | Ikona apki bez sygnetu w tle, ikona w pasku menu to schowek; z O aplikacji znika sekcja nazwy-parasola | brak wspólnej marki narzędzi |
@@ -218,7 +218,7 @@ Wydanie: 1.2.0 (pierwsze z nowym identyfikatorem i certyfikatem; na Macu Eryka l
 - [x] F3 Interfejs (pasek menu z sygnetem ES, okno ustawień, Dock tylko przy oknie - sprawdzone, HUD, schemat URL - Repair sprawdzony na żywo)
 - [x] F4 Ikona i brand (wariant E: sygnet w tle, zielony schowek; jasna domyślnie, ciemna w locie)
 - [x] F5 Paczka (universal .app, zip, DMG, instrukcja PL; podpis ad-hoc do czasu F6)
-- [x] F6 Aktualizacje - repo publiczne, certyfikat "Eryk Sadowski Code Signing" (od 1.2.0; wcześniej inna nazwa) w pęku kluczy, klucz EdDSA w pliku, kopie w 1Password (Sadowscy > Work > "Cleanpasta signing", ta sama nazwa co w `scripts/release.sh`); Release v1.0.0 opublikowany, komenda instalacyjna sprawdzona; aktualizacja 1.0.0 -> 1.0.1 sprawdzona lokalnie. Do zrobienia: wydanie automatycznie z GitHub Actions po zmianie wersji na `main`
+- [x] F6 Aktualizacje - repo publiczne, certyfikat "Eryk Sadowski" (od 1.2.0; wcześniej inna nazwa) w pęku kluczy, klucz EdDSA w pliku, kopie w 1Password (Sadowscy > Work > "Cleanpasta signing", ta sama nazwa co w `scripts/release.sh`); Release v1.0.0 opublikowany, komenda instalacyjna sprawdzona; aktualizacja 1.0.0 -> 1.0.1 sprawdzona lokalnie. Do zrobienia: wydanie automatycznie z GitHub Actions po zmianie wersji na `main`
 - [x] F6b Skill AI (wgrany na claude.ai; od 1.1.0 jako `cleanpasta`, od 26.10.2026 w osobnym repo skilli)
 - [x] F7 Przekazanie Maćkowi - DMG 1.0.0 z PDF "Jak zainstalować" oddany Erykowi (01.10)
 - [x] F8 Porządki repozytoriów (repo docs z historią brandu, Logo Export z historią z powrotem w swoim repo, rejestr nazw) - PR-y zmergowane

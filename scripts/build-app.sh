@@ -1,7 +1,7 @@
 #!/bin/sh
 # Builds dist/Cleanpasta.app (menu bar app + cleanpasta CLI + Sparkle), signs it, and
 # packs dist/Cleanpasta-VERSION.zip and dist/Cleanpasta-VERSION.dmg.
-# Signing: the "Eryk Sadowski Code Signing" certificate when it is in the keychain
+# Signing: the "Eryk Sadowski" certificate when it is in the keychain
 # (scripts/setup-signing.sh), otherwise ad-hoc.
 set -eu
 cd "$(dirname "$0")/.."
@@ -11,7 +11,7 @@ BUILD="${BUILD:-$(git rev-list --count HEAD 2>/dev/null || echo 1)}"
 DIST="${DIST:-dist}"
 [ -n "$VERSION" ] || { echo "No version in CHANGELOG.md" >&2; exit 1; }
 APP="$DIST/Cleanpasta.app"
-IDENTITY="${CODE_SIGN_IDENTITY:-Eryk Sadowski Code Signing}"
+IDENTITY="${CODE_SIGN_IDENTITY:-Eryk Sadowski}"
 if [ "$IDENTITY" != "-" ]; then
   security find-certificate -c "$IDENTITY" >/dev/null 2>&1 || {
     [ "${REQUIRE_SIGNING:-0}" != "1" ] || { echo "Release signing certificate not found: $IDENTITY" >&2; exit 1; }
@@ -19,7 +19,7 @@ if [ "$IDENTITY" != "-" ]; then
   }
 fi
 if [ "${REQUIRE_SIGNING:-0}" = "1" ] && [ "$IDENTITY" = "-" ]; then
-  echo "A release requires the Eryk Sadowski Code Signing identity; ad-hoc signing is not allowed." >&2
+  echo "A release requires the Eryk Sadowski identity; ad-hoc signing is not allowed." >&2
   exit 1
 fi
 PUBLIC_KEY="$(cat Resources/sparkle-public-key.txt 2>/dev/null || true)"

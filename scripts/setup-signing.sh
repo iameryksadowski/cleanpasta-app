@@ -1,6 +1,6 @@
 #!/bin/sh
 # One-time setup on the release Mac (run it yourself, it changes your keychain):
-# 1. "Eryk Sadowski Code Signing" - a free self-signed certificate. A stable signature keeps
+# 1. "Eryk Sadowski" - a free self-signed certificate. A stable signature keeps
 #    the Accessibility permission across updates.
 # 2. Sparkle EdDSA key (a file, created once) - installed apps accept only updates signed with it.
 # Backups land in ~/.config/eryksadowski/signing; move them to 1Password right after.
@@ -9,16 +9,17 @@ cd "$(dirname "$0")/.."
 OUT="$HOME/.config/eryksadowski/signing"
 mkdir -p "$OUT" && chmod 700 "$HOME/.config/eryksadowski" "$OUT"
 
-if security find-certificate -c "Eryk Sadowski Code Signing" >/dev/null 2>&1; then
+# Exact name: find-certificate -c also matches a part of a name.
+if security find-certificate -a -c "Eryk Sadowski" 2>/dev/null | grep -Fq '"labl"<blob>="Eryk Sadowski"'; then
   echo "Certificate: already in the keychain"
 else
   PASS="$(openssl rand -hex 16)"
   /usr/bin/openssl req -x509 -newkey rsa:2048 -nodes -days 3650 \
     -keyout "$OUT/eryk-sadowski-code-signing.key" -out "$OUT/eryk-sadowski-code-signing.crt" \
-    -subj "/CN=Eryk Sadowski Code Signing/O=Eryk Sadowski" \
+    -subj "/CN=Eryk Sadowski/O=Eryk Sadowski" \
     -addext "basicConstraints=critical,CA:false" -addext "keyUsage=critical,digitalSignature" \
     -addext "extendedKeyUsage=critical,codeSigning" 2>/dev/null
-  /usr/bin/openssl pkcs12 -export -name "Eryk Sadowski Code Signing" -inkey "$OUT/eryk-sadowski-code-signing.key" \
+  /usr/bin/openssl pkcs12 -export -name "Eryk Sadowski" -inkey "$OUT/eryk-sadowski-code-signing.key" \
     -in "$OUT/eryk-sadowski-code-signing.crt" -out "$OUT/eryk-sadowski-code-signing.p12" -passout "pass:$PASS"
   printf '%s\n' "$PASS" > "$OUT/eryk-sadowski-code-signing.p12-password.txt"
   rm -f "$OUT/eryk-sadowski-code-signing.key"
