@@ -337,7 +337,7 @@ enum LegacyDefaults {
     static let newDomain = "com.eryksadowski.cleanpasta"
     static let keys = [
         "replaceDashes", "replaceQuotes", "fontSize", "pasteCleanShortcut", "repairShortcut",
-        "showFeedback", "launchedBefore", "accessibilityWasAllowed", "migratedToCleanpasta",
+        "showFeedback", "raycastEnabled", "launchedBefore", "accessibilityWasAllowed", "migratedToCleanpasta",
     ]
 
     static func migrateIfNeeded() {
