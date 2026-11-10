@@ -1,8 +1,8 @@
 import AppKit
 import CleanpastaCore
 
-// cleanpasta - the Cleanpasta command line tool. Same cleaning as the app
-// and the Raycast extension; meant for people, scripts and AI assistants.
+// cleanpasta - the Cleanpasta command line tool. Same cleaning as the app;
+// meant for people, scripts and AI assistants.
 
 let version = "1.2.0"
 
