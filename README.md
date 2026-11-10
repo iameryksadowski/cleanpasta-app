@@ -41,9 +41,7 @@ pbpaste | cleanpasta --text --print text
 cleanpasta --repair                     # fix the clipboard, then paste anywhere
 ```
 
-`cleanpasta --help` lists every option. The `skills/cleanpasta` skill teaches Claude to hand over drafts through `cleanpasta --copy`, so they paste already formatted.
-
-**Raycast:** Settings > Raycast > Raycast commands saves the commands as Raycast Quicklinks and opens Raycast; there, run Import Quicklinks and pick "Cleanpasta for Raycast.json" in Downloads. The links work in any launcher or script: `cleanpasta://paste`, `://repair`, `://settings`, `://about`.
+`cleanpasta --help` lists every option; `--paste` and `--repair` do the same as the shortcuts, for scripts and launchers. The `skills/cleanpasta` skill teaches Claude to hand over drafts through `cleanpasta --copy`, so they paste already formatted.
 
 ## How it works
 
@@ -53,7 +51,7 @@ Updates use [Sparkle](https://sparkle-project.org) with an EdDSA signature; the 
 
 ## Development
 
-- `scripts/test.sh` - builds the CLI and checks JavaScriptCore against the TypeScript converter (run `pnpm install` in `converter/` first).
+- `scripts/test.sh` - checks for typographic dashes and quotes, runs the converter tests, builds the CLI and checks JavaScriptCore against the TypeScript converter (run `pnpm install` in `converter/` first).
 - `scripts/build-converter.sh` - rebuilds `Resources/convert.js` after a change in `converter/src/convert.ts`.
 - `scripts/make-icon.sh` - `design/icon.svg` (light) and `design/icon-dark.svg` to the app icons.
 - `scripts/build-app.sh` - `dist/Cleanpasta.app`, zip and DMG (universal: Apple silicon and Intel).

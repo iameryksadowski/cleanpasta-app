@@ -51,22 +51,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
-    /// Opening the app again (Finder, Spotlight, Raycast) shows the settings.
+    /// Opening the app again (Finder, Spotlight, a launcher) shows the settings.
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         settings.show()
         return false
-    }
-
-    // cleanpasta://paste, ://repair, ://settings, ://about (Raycast, scripts)
-    func application(_ application: NSApplication, open urls: [URL]) {
-        for url in urls where url.scheme == "cleanpasta" {
-            switch url.host ?? url.path.trimmingCharacters(in: CharacterSet(charactersIn: "/")) {
-            case "paste": pasteClean(delay: 0.35) // let a launcher (Raycast) close and the target app come back
-            case "repair": repairClipboard()
-            case "about": showAbout()
-            default: settings.show()
-            }
-        }
     }
 
     // MARK: - Hotkeys
@@ -337,7 +325,7 @@ enum LegacyDefaults {
     static let newDomain = "com.eryksadowski.cleanpasta"
     static let keys = [
         "replaceDashes", "replaceQuotes", "fontSize", "pasteCleanShortcut", "repairShortcut",
-        "showFeedback", "raycastEnabled", "launchedBefore", "accessibilityWasAllowed", "migratedToCleanpasta",
+        "showFeedback", "launchedBefore", "accessibilityWasAllowed", "migratedToCleanpasta",
     ]
 
     static func migrateIfNeeded() {

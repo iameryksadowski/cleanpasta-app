@@ -56,13 +56,6 @@
     }
   },
   "plugins": {
-    "deep-link": {
-      "desktop": {
-        "schemes": [
-          "cleanpasta"
-        ]
-      }
-    },
     "updater": {
       "pubkey": "REPLACE_WITH_ERYKS_ED25519_PUBLIC_KEY",
       "endpoints": [

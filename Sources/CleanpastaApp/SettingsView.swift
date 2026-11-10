@@ -43,8 +43,6 @@ struct SettingsView: View {
     @State private var loginError: String?
     @State private var autoUpdates = false
     @State private var cliStatus = CommandLineTool.status()
-    @State private var raycastNote: String?
-    @AppStorage("raycastEnabled") private var raycastEnabled = false
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     private var version: String {
@@ -155,35 +153,6 @@ struct SettingsView: View {
                 }
             }
 
-            Section {
-                if RaycastIntegration.isInstalled {
-                    Toggle(isOn: $raycastEnabled) {
-                        Text("Raycast commands")
-                        Text("Paste Clean, Repair Clipboard, Settings and About as commands in Raycast, so you can run them from Raycast or give them Raycast hotkeys.")
-                    }
-                    .onChange(of: raycastEnabled) { _, enabled in
-                        raycastNote = enabled ? RaycastIntegration.enable() : RaycastIntegration.disable()
-                    }
-                    if let raycastNote {
-                        Text(raycastNote)
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .textSelection(.enabled)
-                    }
-                } else {
-                    LabeledContent("Raycast commands") {
-                        Text("Raycast is not installed").foregroundStyle(.secondary)
-                    }
-                }
-            } header: {
-                Text("Raycast")
-            } footer: {
-                Text("Other launchers and scripts can use the links cleanpasta://paste, cleanpasta://repair, cleanpasta://settings and cleanpasta://about.")
-                    .foregroundStyle(.secondary)
-                    .textSelection(.enabled)
-            }
-
             Section("Updates") {
                 Toggle("Check for updates automatically", isOn: $autoUpdates)
                     .onChange(of: autoUpdates) { _, value in updater.automaticallyChecks = value }
@@ -287,44 +256,5 @@ enum CommandLineTool {
             result.note = "Installed. Add ~/.local/bin to your PATH to use cleanpasta in Terminal."
         }
         return result
-    }
-}
-
-/// Raycast commands = Raycast Quicklinks that call Cleanpasta through its links
-/// (cleanpasta://...). Raycast has no public way to add them from outside, so Cleanpasta
-/// writes a file for Raycast's Import Quicklinks command and opens Raycast.
-enum RaycastIntegration {
-    static var raycastURL: URL? { NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.raycast.macos") }
-    static var isInstalled: Bool { raycastURL != nil }
-
-    static let quicklinks: [[String: String]] = [
-        ["name": "Cleanpasta: Paste Clean", "link": "cleanpasta://paste"],
-        ["name": "Cleanpasta: Repair Clipboard", "link": "cleanpasta://repair"],
-        ["name": "Cleanpasta: Settings", "link": "cleanpasta://settings"],
-        ["name": "Cleanpasta: About", "link": "cleanpasta://about"],
-    ]
-
-    static var fileURL: URL {
-        FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0].appendingPathComponent("Cleanpasta for Raycast.json")
-    }
-
-    /// Writes the import file to Downloads, opens Raycast and returns the next steps.
-    static func enable() -> String {
-        do {
-            let data = try JSONSerialization.data(withJSONObject: quicklinks, options: [.prettyPrinted, .withoutEscapingSlashes])
-            try data.write(to: fileURL, options: .atomic)
-        } catch {
-            return "Could not write the file for Raycast: \(error.localizedDescription)"
-        }
-        if let raycastURL {
-            NSWorkspace.shared.openApplication(at: raycastURL, configuration: NSWorkspace.OpenConfiguration())
-        }
-        return "One step in Raycast: type Import Quicklinks, press Return and pick \"Cleanpasta for Raycast.json\" in Downloads. The commands start with \"Cleanpasta:\". Hotkeys for them: Raycast Settings > Extensions > Quicklinks."
-    }
-
-    /// Removes the import file and returns how to remove the commands from Raycast.
-    static func disable() -> String {
-        try? FileManager.default.removeItem(at: fileURL)
-        return "To remove the commands: in Raycast type Search Quicklinks, select a \"Cleanpasta:\" command, press Cmd+K and choose Delete Quicklink; repeat for each of them."
     }
 }

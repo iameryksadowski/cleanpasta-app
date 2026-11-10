@@ -1,6 +1,6 @@
 # Cleanpasta on Windows
 
-Status: implementation preview on `feature/windows`, targeting `development`; architecture proposed on 2026-10-21, pending Eryk's acceptance. No release is published by this work.
+Status: preview on `development` since 2026-10-21 (CI builds an unsigned installer); not released. Release gates are at the end of this file.
 
 ## Architecture decision
 
@@ -48,7 +48,7 @@ Default Paste Clean: `Ctrl+Alt+Shift+V`; Repair Clipboard has no default. This c
 
 Paste Clean waits up to three seconds for Ctrl, Alt, Shift and Win to be released before sending Ctrl+V using SendInput. A partial SendInput failure sends key-up events to avoid stuck Ctrl. The nonfocusable, topmost HUD never activates a window. Tray clicks capture the destination window and attempt to restore it before pasting; Windows focus restrictions can refuse this, in which case the clipboard remains ready for manual Ctrl+V. Tray focus restoration, multiple monitors, layouts and elevated target apps require manual Windows verification. Injection success means Windows accepted the events, not proof that a particular editor inserted the content. [SendInput and UIPI restrictions](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput).
 
-Deep links: `cleanpasta://paste`, `cleanpasta://repair`, `cleanpasta://settings`, `cleanpasta://about`. The installer registers the scheme. Single-instance handling delivers links to the existing process. Links select a fixed action and cannot provide text, settings, executable paths or commands. Test links with the installed app, not an unregistered development binary. [Deep links](https://v2.tauri.app/plugin/deep-linking/).
+Starting the app again while it runs (Start menu, a launcher) opens the settings of the running process; there are no deep links (removed in 1.2.0 together with the macOS link scheme).
 
 ## Preferences and CLI
 
@@ -91,9 +91,9 @@ Sources: [Microsoft service and price](https://azure.microsoft.com/en-us/product
 5. Save formatting and shortcuts, restart and confirm persistence. Deliberately register a conflicting shortcut and check the error and rollback. Test Polish AltGr, light/dark OS tray icons and the UI theme switch.
 6. Enable autostart, sign out/in, confirm exactly one tray instance, then disable it. Close settings, reopen from tray, open About, then Quit.
 7. Install the CLI to user PATH. Open a new PowerShell terminal, run `cleanpasta --help`, `cleanpasta draft.md --body --copy`, pipe text with `--print json`, use `--repair`, and check exit codes. Verify UTF-8 text on stdout. Compare CLI and app settings.
-8. Invoke all four `cleanpasta://` links while running and while stopped. Confirm single-instance behavior. Test `--paste` into a normal editor and an elevated editor; verify the manual-paste fallback.
+8. Start the app a second time while it runs: the settings of the running process open, no second tray icon appears. Test `--paste` into a normal editor and an elevated editor; verify the manual-paste fallback.
 9. With Eryk's future signed feed, check changelog and explicit installation, restart, reject a tampered signature, test an unavailable server and confirm automatic checks never install silently.
 
 ## Differences from macOS and remaining gates
 
-Native Swift/SwiftUI, JavaScriptCore, NSPasteboard, CGEvent, SMAppService and Sparkle remain unchanged. Windows uses WebView2/Tauri, QuickJS, CF_HTML/Unicode, SendInput, per-user autostart and Tauri's updater. Windows has no macOS Accessibility prompt; UIPI and focus rules still apply. RTF/web archives, native Raycast integration and automatic refresh/removal of an optional CLI copy are outside this preview. Architecture acceptance, manual Windows behavior, Windows publisher signing and the updater key/feed remain Eryk's decisions before release.
+Native Swift/SwiftUI, JavaScriptCore, NSPasteboard, CGEvent, SMAppService and Sparkle remain unchanged. Windows uses WebView2/Tauri, QuickJS, CF_HTML/Unicode, SendInput, per-user autostart and Tauri's updater. Windows has no macOS Accessibility prompt; UIPI and focus rules still apply. RTF/web archives and automatic refresh/removal of an optional CLI copy are outside this preview. Architecture acceptance, manual Windows behavior, Windows publisher signing and the updater key/feed remain Eryk's decisions before release.
