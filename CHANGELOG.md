@@ -2,21 +2,16 @@
 
 Until 1.0.1 the app was called Clean Paste.
 
-## [1.2.0] - 2026-11-07
+## [1.2.0] - unreleased
+
+Includes the fixes prepared as 1.1.1, which was never released.
 
 ### Changed
 
-- **The ES Tools name is gone.** The app is just Cleanpasta; "Eryk Sadowski" is its signature in the About window and footers, no longer part of the name. The About window lost its ES Tools section and the app and menu bar icons lost the ES ring: the app icon is the green clipboard, the menu bar icon is a plain clipboard.
-- **New identifiers.** Bundle identifier `com.eryksadowski.cleanpasta` (the command line tool: `com.eryksadowski.cleanpasta.cli`), signing certificate "Eryk Sadowski", repository `iameryksadowski/cleanpasta-app`. The update feed and every link point to the new repository. Because the identifier and the signature change, install 1.2.0 by hand instead of waiting for an update from 1.1.x.
+- **Cleanpasta stands on its own.** No product line name anymore: the app is Cleanpasta and "Eryk Sadowski" is its signature in the About window and footers. The About window is simpler, the app icon is the green clipboard and the menu bar icon a plain clipboard.
+- **New identifiers.** Bundle identifier `com.eryksadowski.cleanpasta` (the command line tool: `com.eryksadowski.cleanpasta.cli`), signing certificate "Eryk Sadowski", repository `iameryksadowski/cleanpasta-app`. The update feed and every link point to the new repository. Because the identifier and the signature change, install 1.2.0 with the install command instead of waiting for an update from 1.1.x; then allow Accessibility once more and turn Open at login back on if you use it.
 - On first launch the settings and shortcuts are copied once from the previous identifier, so an existing installation keeps them. The old settings are left in place.
-- Windows: identifier `com.eryksadowski.cleanpasta`, settings in `%APPDATA%\cleanpasta`, command line tool installed to `%LOCALAPPDATA%\Cleanpasta\bin`, settings window without the wordmark.
-
-### Removed
-
-- The old `estools-clean-paste://` link scheme. Use `cleanpasta://`.
-
-
-## [1.1.1] - 2026-10-16
+- Windows preview: identifier `com.eryksadowski.cleanpasta`, settings in `%APPDATA%\cleanpasta`, command line tool installed to `%LOCALAPPDATA%\Cleanpasta\bin`, settings window without the wordmark; starting the app again opens its settings.
 
 ### Fixed
 
@@ -28,6 +23,10 @@ Until 1.0.1 the app was called Clean Paste.
 - Preserve unrelated command line tools when installing the CLI, and keep the legacy command available if rename migration fails.
 - Validate and stage downloaded apps before replacing an installation; releases now require a persistent signing identity instead of silently falling back to ad-hoc signing.
 
+### Removed
+
+- **Raycast commands** and the Raycast section in Settings. Use the shortcuts, the menu bar icon or the `cleanpasta` command line tool (`--paste`, `--repair`).
+- The `cleanpasta://` links and the older link scheme from 1.0.x; on Windows the matching deep links. Scripts and launchers use the `cleanpasta` command line tool.
 
 ## [1.1.0] - 2026-10-15
 
@@ -46,7 +45,7 @@ Until 1.0.1 the app was called Clean Paste.
 
 ### Added
 
-- **About Clean Paste** in the menu bar menu: the tool, its version and build, ES Tools, the author (Eryk Sadowski) and links to the source code, changelog and license.
+- **About Clean Paste** in the menu bar menu: the tool, its version and build, the author (Eryk Sadowski) and links to the source code, changelog and license.
 - **Add to Raycast** in Settings > General: saves Paste Clean, Repair Clipboard, Settings and About as Raycast Quicklinks ("Clean Paste for Raycast.json" in Downloads) and opens Raycast for its Import Quicklinks command; give them Raycast hotkeys if you like.
 - `estools-clean-paste://about` link.
 - The menu bar menu shows the installed version at the bottom, so you can see at a glance that an update went through.
