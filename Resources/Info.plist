@@ -6,8 +6,9 @@
 	<string>Cleanpasta</string>
 	<key>CFBundleDisplayName</key>
 	<string>Cleanpasta</string>
+	<!-- Since 1.2.0; settings from the old identifier are copied once at launch (LegacyDefaults in AppDelegate.swift). -->
 	<key>CFBundleIdentifier</key>
-	<string>com.eryksadowski.estools.cleanpaste</string>
+	<string>com.eryksadowski.cleanpasta</string>
 	<key>CFBundleExecutable</key>
 	<string>CleanpastaApp</string>
 	<key>CFBundleIconFile</key>
@@ -27,21 +28,9 @@
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.productivity</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>ES Tools by Eryk Sadowski · eryksadowski.com</string>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLName</key>
-			<string>ES Tools Cleanpasta</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>cleanpasta</string>
-				<string>estools-clean-paste</string>
-			</array>
-		</dict>
-	</array>
+	<string>Eryk Sadowski · eryksadowski.com</string>
 	<key>SUFeedURL</key>
-	<string>https://github.com/iameryksadowski/estools-app-cleanpasta/releases/latest/download/appcast.xml</string>
+	<string>https://github.com/iameryksadowski/cleanpasta-app/releases/latest/download/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>__SU_PUBLIC_ED_KEY__</string>
 	<key>SUEnableAutomaticChecks</key>

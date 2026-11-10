@@ -1,8 +1,8 @@
 #!/bin/sh
-# ES Tools Cleanpasta installer: puts the latest version into Applications and opens it.
-#   curl -fsSL https://github.com/iameryksadowski/estools-app-cleanpasta/releases/latest/download/install.sh | sh
+# Cleanpasta installer: puts the latest version into Applications and opens it.
+#   curl -fsSL https://github.com/iameryksadowski/cleanpasta-app/releases/latest/download/install.sh | sh
 set -eu
-URL="https://github.com/iameryksadowski/estools-app-cleanpasta/releases/latest/download/Cleanpasta.zip"
+URL="https://github.com/iameryksadowski/cleanpasta-app/releases/latest/download/Cleanpasta.zip"
 DEST="/Applications"
 [ -w "$DEST" ] || { DEST="$HOME/Applications"; mkdir -p "$DEST"; }
 TMP="$(mktemp -d)"
@@ -34,6 +34,8 @@ rollback() {
 }
 trap rollback EXIT
 ditto "$TMP/Cleanpasta.app" "$STAGE/Cleanpasta.app"
+osascript -e 'tell application id "com.eryksadowski.cleanpasta" to quit' >/dev/null 2>&1 || true
+# Legacy migration: 1.1.x and older run under the previous bundle identifier.
 osascript -e 'tell application id "com.eryksadowski.estools.cleanpaste" to quit' >/dev/null 2>&1 || true
 if [ -e "$DEST/Cleanpasta.app" ]; then
   mv "$DEST/Cleanpasta.app" "$BACKUP"

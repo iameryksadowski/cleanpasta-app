@@ -79,7 +79,6 @@ pub fn paste() -> Result<()> {
 pub fn install_cli(source: &std::path::Path) -> Result<String> {
     use winreg::{enums::*, RegKey};
     let bin = PathBuf::from(std::env::var_os("LOCALAPPDATA").ok_or("LOCALAPPDATA is missing")?)
-        .join("ES Tools")
         .join("Cleanpasta")
         .join("bin");
     std::fs::create_dir_all(&bin).map_err(|e| e.to_string())?;

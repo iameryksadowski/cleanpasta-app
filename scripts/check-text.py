@@ -8,8 +8,8 @@ import sys
 
 CHARS = {chr(c) for c in (0x2013, 0x2014, 0x201E, 0x201C, 0x201D, 0x201F, 0x2018, 0x2019, 0x201A, 0x201B, 0x00AB, 0x00BB, 0x2039, 0x203A)}
 SUFFIXES = {".md", ".swift", ".sh", ".py", ".ts", ".json", ".plist", ".html", ".txt", ".svg"}
-SKIP_PARTS = {".build", "node_modules", "dist", ".git", "fixtures"}
-SKIP_FILES = {"convert.test.ts", "webkit-paste.test.ts", "parity.test.ts", "convert.js"}
+SKIP_PARTS = {".build", "node_modules", "dist", ".git", ".claude", "target", "fixtures"}
+SKIP_FILES = {"convert.test.ts", "webkit-paste.test.ts", "parity.test.ts", "parity.json", "convert.js"}
 
 paths = [pathlib.Path(a) for a in sys.argv[1:]] or [pathlib.Path(".")]
 hits = 0

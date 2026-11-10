@@ -1,15 +1,15 @@
 ---
 name: cleanpasta
-description: "Hand over emails, messages and replies ready to paste with their formatting (bold, lists, links) through ES Tools Cleanpasta and its cleanpasta command line tool on macOS. Use when the user asks for an email, message, reply, post or any text to paste into Mail, Gmail, Outlook, Slack, Notion, WhatsApp or a document, or says copy it formatted, put it on my clipboard, give me something to paste, clean paste, fix the clipboard or remove the formatting."
+description: "Hand over emails, messages and replies ready to paste with their formatting (bold, lists, links) through Cleanpasta and its cleanpasta command line tool on macOS. Use when the user asks for an email, message, reply, post or any text to paste into Mail, Gmail, Outlook, Slack, Notion, WhatsApp or a document, or says copy it formatted, put it on my clipboard, give me something to paste, clean paste, fix the clipboard or remove the formatting."
 metadata:
-  version: 1.1.0
-  updated: 2026-10-15
+  version: 1.2.0
+  updated: 2026-11-07
   author: Eryk Sadowski
 ---
 
 # cleanpasta - text ready to paste, formatting included
 
-ES Tools Cleanpasta turns Markdown or rich text into clean formatted text: bold, italic, links, lists and line breaks stay; backgrounds, colors and fonts go; em and en dashes become "-" and typographic quotes become " and '. Pasted into Mail, Gmail or Slack it looks as if it was typed there.
+Cleanpasta turns Markdown or rich text into clean formatted text: bold, italic, links, lists and line breaks stay; backgrounds, colors and fonts go; em and en dashes become "-" and typographic quotes become " and '. Pasted into Mail, Gmail or Slack it looks as if it was typed there.
 
 ## 1. Is the tool here?
 
@@ -18,7 +18,7 @@ command -v cleanpasta || ls "/Applications/Cleanpasta.app/Contents/Helpers/clean
 ```
 
 - Found: use it (full path if it is not on the PATH).
-- Not found, but on a Mac with a shell: say once that ES Tools Cleanpasta is missing (install: `curl -fsSL https://github.com/iameryksadowski/estools-app-cleanpasta/releases/latest/download/install.sh | sh`) and deliver the text in the chat.
+- Not found, but on a Mac with a shell: say once that Cleanpasta is missing (install: `curl -fsSL https://github.com/iameryksadowski/cleanpasta-app/releases/latest/download/install.sh | sh`) and deliver the text in the chat.
 - No shell (claude.ai chat, phone): write the text normally; the user copies it and pastes with the Cleanpasta shortcut (Control+Option+Command+V).
 
 ## 2. A draft to paste

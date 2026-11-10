@@ -14,6 +14,7 @@ public enum CLIInstallation {
             if destination == helper.path { return }
             let target = URL(fileURLWithPath: destination, relativeTo: folder).standardizedFileURL
             let parts = target.pathComponents
+            // Legacy migration: a link into a 1.0.x bundle ("Clean Paste.app", "cleanpaste") is ours to replace.
             guard parts.count >= 4,
                   ["Cleanpasta.app", "Clean Paste.app"].contains(parts[parts.count - 4]),
                   Array(parts.suffix(3).prefix(2)) == ["Contents", "Helpers"],
@@ -32,7 +33,7 @@ public enum CLIInstallation {
             try fm.createSymbolicLink(at: link, withDestinationURL: helper)
         }
     }
-    /// Migration keeps the old command available until the new command is installed.
+    /// Legacy migration (1.0.x `cleanpaste` links): keeps the old command available until the new command is installed.
     public static func migrate(legacyLinks: [URL], helper: URL, folder: URL) throws {
         try install(helper: helper, folder: folder)
         for link in legacyLinks { try FileManager.default.removeItem(at: link) }
