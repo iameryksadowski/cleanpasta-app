@@ -2,7 +2,7 @@
 
 All notable changes to Cleanpasta. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and versions follow [Semantic Versioning](https://semver.org/). The top version is the app's version (`scripts/build-app.sh` reads it); "unreleased" becomes the date on the day of the release.
 
-## [1.2.0] - unreleased
+## [1.2.0] - 2026-11-18
 
 Includes the fixes prepared as 1.1.1, which was never released.
 
