@@ -4,6 +4,13 @@
 
 A menu bar app for macOS that pastes formatted text without the background, colors and fonts it was copied with. Bold, italic, links, lists, line breaks and non-breaking spaces stay, and the text takes the style of wherever you paste it: Mail, Gmail, Slack, Notes, Word or any other app.
 
+## Status
+
+- Version **1.2.0** is ready and not released yet; the latest release is [1.1.0](https://github.com/iameryksadowski/cleanpasta-app/releases/latest). History: [CHANGELOG](CHANGELOG.md).
+- `main` holds released versions; work happens on `development` and reaches `main` through a pull request.
+- Updates come from Cloudflare (`cleanpasta.eryksadowski.workers.dev`, the Worker in `services/updates`), signed with EdDSA; every version is also on GitHub Releases.
+- Plan, decisions and release steps (in Polish): [docs/](docs/README.md).
+
 ## What it does
 
 - **Paste Clean** (Control+Option+Command+V): cleans the clipboard and pastes it into the app you are in.
@@ -33,7 +40,7 @@ Paste Clean defaults to Ctrl+Alt+Shift+V. The tray also offers Repair Clipboard,
 
 ## Command line and AI assistants
 
-Settings > General > Command line tool installs `cleanpasta`:
+Settings > General > Command line tool installs `cleanpasta` as a link in `~/.local/bin`:
 
 ```bash
 cleanpasta draft.md --body --copy       # a Markdown draft to the clipboard, ready for Cmd+V
@@ -55,11 +62,11 @@ Updates use [Sparkle](https://sparkle-project.org) with an EdDSA signature; the 
 - `scripts/build-converter.sh` - rebuilds `Resources/convert.js` after a change in `converter/src/convert.ts`.
 - `scripts/make-icon.sh` - `design/icon.svg` (light) and `design/icon-dark.svg` to the app icons.
 - `scripts/build-app.sh` - `dist/Cleanpasta.app`, zip and DMG (universal: Apple silicon and Intel).
-- `scripts/setup-signing.sh` - one-time signing certificate and update key on the release Mac.
-- `scripts/release.sh` - GitHub release with the zip, DMG, `appcast.xml` and `install.sh`.
+- `scripts/make-update-key.sh --check` - checks that the private update key fits the public key built into the app. The key exists since 1.0.0 and is never replaced.
+- `scripts/release.sh` - GitHub release with the zip, DMG, `appcast.xml` and `install.sh`; signed with the "Eryk Sadowski" certificate shared by Eryk Sadowski's apps.
 - In a restricted environment without macOS pasteboard/WebKit services, `CLEANPASTA_SKIP_PASTE_TESTS=1 scripts/test.sh` explicitly skips editor paste tests. This checks conversion and CLI behavior only; run the default suite on a normal Mac before release.
 - `CODE_SIGN_IDENTITY=- scripts/build-app.sh` builds an ad-hoc test package without querying the signing keychain. Release builds require the persistent signing certificate.
-- Plan and decisions: [docs/plan.md](docs/plan.md). Changes: [CHANGELOG.md](CHANGELOG.md).
+- Documents (in Polish): [docs/README.md](docs/README.md) - decisions, roadmap, build and release. Changes: [CHANGELOG.md](CHANGELOG.md).
 
 ---
 

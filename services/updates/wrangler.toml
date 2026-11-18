@@ -1,0 +1,24 @@
+# Cleanpasta updates on Cloudflare, like Mowa (docs/dystrybucja.md): the Worker "cleanpasta" serves the
+# Sparkle appcast and the update archives from the R2 bucket "cleanpasta-releases". It holds no secrets.
+# Until the zone eryksadowski.com is on this account the address is https://cleanpasta.eryksadowski.workers.dev
+# (SUFeedURL in Resources/Info.plist); workers.dev stays on for good, so installed apps keep working.
+name = "cleanpasta"
+main = "src/index.ts"
+compatibility_date = "2026-11-01"
+# Account "Eryk Sadowski": pinned so a deploy can never land in another account this login can reach.
+account_id = "e56231e7274db57b19724dcbaba8b811"
+workers_dev = true
+preview_urls = false
+# Later, once the zone eryksadowski.com is on this account: uncomment, deploy, then point SUFeedURL there.
+# routes = [
+#   { pattern = "cleanpasta.eryksadowski.com/*", zone_name = "eryksadowski.com" },
+# ]
+send_metrics = false
+
+[observability]
+enabled = false
+
+# Written by scripts/release.sh (wrangler r2 object put); this Worker only reads updates/*.
+[[r2_buckets]]
+binding = "RELEASES"
+bucket_name = "cleanpasta-releases"

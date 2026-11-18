@@ -6,7 +6,6 @@
 	<string>Cleanpasta</string>
 	<key>CFBundleDisplayName</key>
 	<string>Cleanpasta</string>
-	<!-- Since 1.2.0; settings from the old identifier are copied once at launch (LegacyDefaults in AppDelegate.swift). -->
 	<key>CFBundleIdentifier</key>
 	<string>com.eryksadowski.cleanpasta</string>
 	<key>CFBundleExecutable</key>
@@ -30,7 +29,7 @@
 	<key>NSHumanReadableCopyright</key>
 	<string>Eryk Sadowski · eryksadowski.com</string>
 	<key>SUFeedURL</key>
-	<string>https://github.com/iameryksadowski/cleanpasta-app/releases/latest/download/appcast.xml</string>
+	<string>https://cleanpasta.eryksadowski.workers.dev/updates/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>__SU_PUBLIC_ED_KEY__</string>
 	<key>SUEnableAutomaticChecks</key>

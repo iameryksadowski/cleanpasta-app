@@ -210,7 +210,7 @@ struct SettingsView: View {
     }
 }
 
-/// Links Contents/Helpers/cleanpasta into a folder on the PATH, without an admin password.
+/// Links Contents/Helpers/cleanpasta into ~/.local/bin, without an admin password (like Mowa).
 enum CommandLineTool {
     struct Status {
         var installed: Bool
@@ -218,26 +218,27 @@ enum CommandLineTool {
         var note: String?
     }
 
+    static let addToPathCommand = "echo 'export PATH=\"$HOME/.local/bin:$PATH\"' >> ~/.zprofile"
+
     static var helper: URL { Bundle.main.bundleURL.appendingPathComponent("Contents/Helpers/cleanpasta") }
 
-    static var candidateFolders: [URL] {
-        ["/opt/homebrew/bin", "/usr/local/bin"].map { URL(fileURLWithPath: $0) }
-            + [FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".local/bin")]
-    }
+    private static var home: URL { FileManager.default.homeDirectoryForCurrentUser }
 
-    /// Homebrew's folder is on the PATH and writable without a password; ~/.local/bin otherwise.
-    static var targetFolder: URL {
-        let fm = FileManager.default
-        for folder in ["/opt/homebrew/bin", "/usr/local/bin"] where fm.isWritableFile(atPath: folder) {
-            return URL(fileURLWithPath: folder)
-        }
-        return fm.homeDirectoryForCurrentUser.appendingPathComponent(".local/bin")
+    static var targetFolder: URL { home.appendingPathComponent(".local/bin") }
+
+    /// Where 1.1.x and earlier linked the command.
+    static var previousFolders: [URL] { ["/opt/homebrew/bin", "/usr/local/bin"].map { URL(fileURLWithPath: $0) } }
+
+    static var targetIsOnPath: Bool {
+        CLIInstallation.isOnShellPath(targetFolder, home: home, environmentPath: ProcessInfo.processInfo.environment["PATH"] ?? "")
     }
 
     static func status() -> Status {
         let link = targetFolder.appendingPathComponent("cleanpasta")
         let destination = try? FileManager.default.destinationOfSymbolicLink(atPath: link.path)
-        return Status(installed: destination == helper.path, path: link.path.replacingOccurrences(of: NSHomeDirectory(), with: "~"))
+        let installed = destination == helper.path
+        let note = installed && !targetIsOnPath ? "Installed. Add ~/.local/bin to your PATH: \(addToPathCommand)" : nil
+        return Status(installed: installed, path: link.path.replacingOccurrences(of: NSHomeDirectory(), with: "~"), note: note)
     }
 
     static func install() -> Status {
@@ -245,16 +246,23 @@ enum CommandLineTool {
         guard fm.fileExists(atPath: helper.path) else {
             return Status(installed: false, path: "", note: "The command line tool is missing from this build.")
         }
-        let folder = targetFolder
         do {
-            try CLIInstallation.install(helper: helper, folder: folder)
+            try CLIInstallation.install(helper: helper, folder: targetFolder)
         } catch {
             return Status(installed: false, path: "", note: "Could not install: \(error.localizedDescription)")
         }
-        var result = status()
-        if folder.path.hasSuffix("/.local/bin") {
-            result.note = "Installed. Add ~/.local/bin to your PATH to use cleanpasta in Terminal."
+        return status()
+    }
+
+    /// At every launch until it is done: a link from 1.1.x moves to ~/.local/bin (CLIInstallation.moveToLocalBin).
+    static func moveToLocalBinIfNeeded() {
+        let defaults = UserDefaults.standard
+        guard !defaults.bool(forKey: "cliInLocalBin") else { return }
+        do {
+            let left = try CLIInstallation.moveToLocalBin(previousFolders: previousFolders, helper: helper, localBin: targetFolder, removeOld: targetIsOnPath)
+            if left.isEmpty { defaults.set(true, forKey: "cliInLocalBin") }
+        } catch {
+            NSLog("Cleanpasta: command line link stays where it is for now: %@", error.localizedDescription)
         }
-        return result
     }
 }

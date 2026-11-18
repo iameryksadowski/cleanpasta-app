@@ -1,8 +1,8 @@
 #!/bin/sh
 # Builds dist/Cleanpasta.app (menu bar app + cleanpasta CLI + Sparkle), signs it, and
 # packs dist/Cleanpasta-VERSION.zip and dist/Cleanpasta-VERSION.dmg.
-# Signing: the "Eryk Sadowski" certificate when it is in the keychain
-# (scripts/setup-signing.sh), otherwise ad-hoc.
+# Signing: the "Eryk Sadowski" certificate when it is in the keychain (one certificate for all of
+# Eryk Sadowski's apps, docs/dystrybucja.md), otherwise ad-hoc.
 set -eu
 cd "$(dirname "$0")/.."
 # VERSION, BUILD and DIST can be overridden (e.g. a local update test)
@@ -11,12 +11,26 @@ BUILD="${BUILD:-$(git rev-list --count HEAD 2>/dev/null || echo 1)}"
 DIST="${DIST:-dist}"
 [ -n "$VERSION" ] || { echo "No version in CHANGELOG.md" >&2; exit 1; }
 APP="$DIST/Cleanpasta.app"
+# SHA-1 of the code signing identity with exactly this name (as in Mowa's signing.sh): a name match
+# alone would also take "Eryk Sadowski Test". Without -v: a self-signed certificate has no trust
+# settings, so it is not "valid" for that listing, yet codesign signs with it.
+identity_hash() {
+  security find-identity -p codesigning 2>/dev/null | awk -v name="$1" '
+    /Valid identities only/ { exit }
+    { first = index($0, "\""); if (first == 0) next
+      rest = substr($0, first + 1); last = index(rest, "\"")
+      if (substr(rest, 1, last - 1) == name) { print $2; exit } }'
+}
 IDENTITY="${CODE_SIGN_IDENTITY:-Eryk Sadowski}"
+IDENTITY_NAME="$IDENTITY"
 if [ "$IDENTITY" != "-" ]; then
-  security find-certificate -c "$IDENTITY" >/dev/null 2>&1 || {
+  HASH="$(identity_hash "$IDENTITY")"
+  if [ -n "$HASH" ]; then
+    IDENTITY="$HASH"
+  else
     [ "${REQUIRE_SIGNING:-0}" != "1" ] || { echo "Release signing certificate not found: $IDENTITY" >&2; exit 1; }
     IDENTITY="-"
-  }
+  fi
 fi
 if [ "${REQUIRE_SIGNING:-0}" = "1" ] && [ "$IDENTITY" = "-" ]; then
   echo "A release requires the Eryk Sadowski identity; ad-hoc signing is not allowed." >&2
@@ -64,7 +78,7 @@ sign "$APP/Contents/Frameworks/Sparkle.framework"
 sign --identifier com.eryksadowski.cleanpasta.cli "$APP/Contents/Helpers/cleanpasta"
 sign "$APP"
 codesign --verify --deep --strict "$APP"
-echo "Signed with: $IDENTITY"
+if [ "$IDENTITY" = "-" ]; then echo "Signed ad-hoc"; else echo "Signed with: $IDENTITY_NAME ($IDENTITY)"; fi
 
 ZIP="$DIST/Cleanpasta-$VERSION.zip"
 rm -f "$ZIP"

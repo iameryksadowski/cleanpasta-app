@@ -35,8 +35,8 @@ rollback() {
 trap rollback EXIT
 ditto "$TMP/Cleanpasta.app" "$STAGE/Cleanpasta.app"
 osascript -e 'tell application id "com.eryksadowski.cleanpasta" to quit' >/dev/null 2>&1 || true
-# Legacy migration: 1.1.x and older run under the previous bundle identifier.
-osascript -e 'tell application id "com.eryksadowski.estools.cleanpaste" to quit' >/dev/null 2>&1 || true
+# Versions up to 1.1.0 have another bundle identifier: stop any copy still running by its executable name.
+pkill -x CleanpastaApp >/dev/null 2>&1 || true
 if [ -e "$DEST/Cleanpasta.app" ]; then
   mv "$DEST/Cleanpasta.app" "$BACKUP"
 fi

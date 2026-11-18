@@ -1,0 +1,24 @@
+# Decyzje
+
+Rejestr decyzji Cleanpasty, w tym samym układzie co w Mowie. Co z nich wynika na kolejne tygodnie: [ROADMAP.md](ROADMAP.md). Budowanie, podpis, klucze i wydanie: [dystrybucja.md](dystrybucja.md). Historia zmian: [CHANGELOG.md](../CHANGELOG.md). Dawny plan faz F1-F10 (do 07.11.2026): `git show e9348e7:docs/plan.md`.
+
+| ID | Temat | Stan |
+|---|---|---|
+| D1 | Jedno publiczne repo `iameryksadowski/cleanpasta-app` (MIT), `main` = wydane wersje, praca na `development`, PR `development` -> `main` | przyjęte |
+| D2 | Natywnie: Swift, AppKit + SwiftUI, Swift Package Manager na Command Line Tools (bez projektu Xcode), minimum macOS 14. JavaScriptCore z macOS 14 obsługuje wszystkie wyrażenia konwertera | przyjęte |
+| D3 | Jedno źródło czyszczenia: `converter/src/convert.ts`, bundlowane do `Resources/convert.js`; macOS uruchamia je w JavaScriptCore, Windows w QuickJS. Jedna logika i jedne testy dla apki, CLI i Windows | przyjęte |
+| D4 | Schowek natywnie (NSPasteboard: HTML, web archive, RTF, tekst), Cmd+V przez CGEvent po puszczeniu modyfikatorów, żeby Mail nie zamieniał wklejenia na "Wklej i dopasuj styl" | przyjęte |
+| D5 | Skróty globalne przez Carbon `RegisterEventHotKey`, każdy skrót można usunąć. Bez Dostępności i bez zależności | przyjęte |
+| D6 | Pasek menu, ikona w Docku tylko przy otwartym oknie; start przy logowaniu przez `SMAppService.mainApp` | przyjęte |
+| D7 | Aktualizacje: Sparkle 2 + EdDSA, changelog w oknie aktualizacji, instalacja po zgodzie użytkownika. Appcast i paczki jak w Mowie na Cloudflare, na koncie "Eryk Sadowski": Worker `cleanpasta` (`services/updates`) czyta bucket R2 `cleanpasta-releases`, adres `https://cleanpasta.eryksadowski.workers.dev/updates/appcast.xml`, później `cleanpasta.eryksadowski.com`. Każda wersja idzie też do GitHub Release (DMG, `install.sh`, appcast dla wersji do 1.1.0) | przyjęte 18.11.2026 (Eryk: Cloudflare od razu); do 1.1.0 appcast tylko w GitHub Release |
+| D8 | Bez konta Apple Developer i bez notaryzacji. Podpis stałym samopodpisanym certyfikatem "Eryk Sadowski", wspólnym dla wszystkich aplikacji Eryka (jak Mowa D4); integralność aktualizacji chroni podpis EdDSA. Certyfikat tworzy i trzyma Eryk, agenci nim nie podpisują | przyjęte; od 1.2.0 |
+| D9 | Identyfikatory od 1.2.0: pakiet `com.eryksadowski.cleanpasta`, CLI `com.eryksadowski.cleanpasta.cli`, domena ustawień = identyfikator pakietu (Cleanpasta nie ma własnego folderu danych), zasoby Cloudflare `cleanpasta` i `cleanpasta-releases` | przyjęte 07.11.2026 (jak Mowa D13) |
+| D10 | W repo jest tylko nazwa Cleanpasta i podpis Eryk Sadowski: bez kodu migracji ze starych nazw i identyfikatorów. Aktualizacja z 1.1.0 startuje jak nowa instalacja (Dostępność, skróty, opcje i Open at login ustawia się raz jeszcze) | przyjęte 18.11.2026 (Eryk) |
+| D11 | CLI `cleanpasta` instalowane z ustawień jako link w `~/.local/bin`, bez hasła administratora, jak `mowa`. Link z 1.1.x w `/opt/homebrew/bin` albo `/usr/local/bin` przenosi się sam; stary znika dopiero, gdy nowy Terminal widzi `~/.local/bin` | przyjęte 18.11.2026 (od 1.2.0); wcześniej najpierw `/opt/homebrew/bin` |
+| D12 | Listy: numerowane punkty wklejamy jako zwykłe akapity "1. ..."; listą są tylko punkty z kropkami pod linią z dwukropkiem. Numeracja w mailach się nie rozjeżdża | przyjęte |
+| D13 | Skill `cleanpasta`: źródło w `skills/cleanpasta` w tym repo, ta sama treść w `eryksadowski-skills` (plugin `eryksadowski`), upload na claude.ai z tamtej kopii; zmiana w jednym miejscu = kopia w drugim tego samego dnia | przyjęte |
+| D14 | Windows: podgląd w `windows/` (Tauri 2, Rust, QuickJS), CI buduje niepodpisany instalator; bez wydania ([windows.md](windows.md)) | przyjęte |
+| D15 | Interfejs, README, CHANGELOG i komentarze po angielsku; instrukcja instalacji i dokumenty w `docs/` po polsku ([instalacja.md](instalacja.md), PDF w DMG z `docs/guide/instalacja.html`) | przyjęte |
+| D16 | Bez nazwy linii produktów: aplikacja to Cleanpasta, "Eryk Sadowski · eryksadowski.com" to podpis w oknie "O aplikacji" ("© 2026 Eryk Sadowski"), w stopce ustawień i w `NSHumanReadableCopyright` | przyjęte 07.11.2026 |
+| D17 | Bez Raycasta: komendy, sekcja w ustawieniach i schemat `cleanpasta://` usunięte w 1.2.0; skrypty i launchery używają CLI (`--paste`, `--repair`) | przyjęte 10.11.2026 |
+| D18 | Klucze jak w Mowie: klucz prywatny Sparkle w `~/.config/eryksadowski/signing/cleanpasta-sparkle-private-key.txt` (0600) i w 1Password ("Cleanpasta - klucz aktualizacji Sparkle", sejf Work), publiczny w `Resources/sparkle-public-key.txt`. Ten sam klucz od 1.0.0, nigdy nowy (`scripts/make-update-key.sh` odmawia) | przyjęte 18.11.2026 |

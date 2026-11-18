@@ -4,3 +4,4 @@
 .swiftpm/
 dist/
 node_modules/
+.wrangler/
