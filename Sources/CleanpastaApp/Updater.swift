@@ -1,8 +1,8 @@
 import AppKit
 import Sparkle
 
-/// In-app updates through Sparkle: once a day the app reads appcast.xml from the latest
-/// GitHub release; a new version shows its changelog and installs after the user agrees.
+/// In-app updates through Sparkle: once a day the app reads appcast.xml from
+/// cleanpasta.eryksadowski.workers.dev (Cloudflare); a new version shows its changelog and installs after the user agrees.
 /// Updates are verified with an EdDSA signature; no Apple developer account is involved.
 final class Updater: NSObject, SPUUpdaterDelegate, SPUStandardUserDriverDelegate {
     private var controller: SPUStandardUpdaterController?

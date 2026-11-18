@@ -296,20 +296,22 @@ struct BrandSwitchStyle: ToggleStyle {
         @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
         var body: some View {
-            ZStack(alignment: isOn ? .trailing : .leading) {
-                Capsule().fill(isOn ? Tokens.accent : Tokens.controlBorder)
-                Capsule().strokeBorder(Tokens.muted, lineWidth: 1).opacity(isOn ? 0 : 1)
-                Circle()
-                    .fill(Color.white)
-                    .frame(width: 16, height: 16)
-                    .shadow(color: .black.opacity(0.25), radius: 1, y: 1)
-                    .padding(2)
-            }
-            .frame(width: 32, height: 20)
-            .opacity(isEnabled ? 1 : 0.4)
-            .contentShape(Capsule())
-            .onTapGesture { if isEnabled { toggle() } }
-            .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: isOn)
+            // Off: a gray track inside a 1 pt `muted` edge, which carries the contrast of the control.
+            Capsule()
+                .fill(isOn ? Tokens.accent : Tokens.muted)
+                .overlay { Capsule().fill(Tokens.controlBorder).padding(1).opacity(isOn ? 0 : 1) }
+                .overlay(alignment: isOn ? .trailing : .leading) {
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 16, height: 16)
+                        .shadow(color: .black.opacity(0.25), radius: 1, y: 1)
+                        .padding(2)
+                }
+                .frame(width: 32, height: 20)
+                .opacity(isEnabled ? 1 : 0.4)
+                .contentShape(Capsule())
+                .onTapGesture { if isEnabled { toggle() } }
+                .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: isOn)
         }
     }
 }

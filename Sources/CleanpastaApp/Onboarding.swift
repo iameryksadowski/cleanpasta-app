@@ -27,7 +27,7 @@ final class OnboardingFlow: ObservableObject {
 
 /// The introduction window: AppKit, so it shows at launch without a SwiftUI scene.
 final class OnboardingWindowController: NSObject, NSWindowDelegate {
-    static let size = NSSize(width: 560, height: 700)
+    static let size = NSSize(width: 568, height: 760)
     private var window: NSWindow?
 
     func show() {
@@ -326,6 +326,16 @@ private struct TryStep: View {
             }
             RichTextField(result: $pasted)
                 .frame(height: 180)
+                .overlay(alignment: .topLeading) {
+                    if pasted == .empty {
+                        Text("Paste here")
+                            .textStyle(.body)
+                            .foregroundStyle(Tokens.muted)
+                            .padding(.horizontal, 17)
+                            .padding(.vertical, 12)
+                            .allowsHitTesting(false)
+                    }
+                }
                 .card()
             switch pasted {
             case .empty: EmptyView()
@@ -466,6 +476,8 @@ struct RichTextField: NSViewRepresentable {
             view.importsGraphics = false
             view.allowsUndo = true
             view.drawsBackground = false
+            // Pasted text has no color of its own: black would vanish on the dark card.
+            view.usesAdaptiveColorMappingForDarkAppearance = true
             view.font = .systemFont(ofSize: 13)
             view.textContainerInset = NSSize(width: 12, height: 12)
             view.delegate = context.coordinator
