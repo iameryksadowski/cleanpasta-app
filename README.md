@@ -6,7 +6,7 @@ A menu bar app for macOS that pastes formatted text without the background, colo
 
 ## Status
 
-- Version **1.2.0** is ready and not released yet; the latest release is [1.1.0](https://github.com/iameryksadowski/cleanpasta-app/releases/latest). History: [CHANGELOG](CHANGELOG.md).
+- Version **1.2.0** (2026-11-18): the look of Eryk Sadowski's apps, an introduction at the first launch, a new icon, updates from Cloudflare. Latest release: [GitHub Releases](https://github.com/iameryksadowski/cleanpasta-app/releases/latest). History: [CHANGELOG](CHANGELOG.md).
 - `main` holds released versions; work happens on `development` and reaches `main` through a pull request.
 - Updates come from Cloudflare (`cleanpasta.eryksadowski.workers.dev`, the Worker in `services/updates`), signed with EdDSA; every version is also on GitHub Releases.
 - Plan, decisions and release steps (in Polish): [docs/](docs/README.md).
