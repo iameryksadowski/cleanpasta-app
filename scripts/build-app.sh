@@ -59,7 +59,8 @@ mkdir -p "$DIST"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/Helpers" "$APP/Contents/Frameworks"
 cp "$BIN/CleanpastaApp" "$APP/Contents/MacOS/CleanpastaApp"
 cp "$BIN/cleanpasta" "$APP/Contents/Helpers/cleanpasta"
-cp Resources/convert.js Resources/AppIcon.icns Resources/AppIcon-dark.png Resources/MenuBarIcon.png Resources/MenuBarIcon@2x.png Resources/SadowskiWordmark-white.png "$APP/Contents/Resources/"
+cp Resources/convert.js Resources/AppIcon.icns Resources/AppIcon-dark.png Resources/MenuBarIcon.png Resources/MenuBarIcon@2x.png "$APP/Contents/Resources/"
+cp -R Resources/Fonts Resources/Onboarding "$APP/Contents/Resources/"
 sed -e "s/__VERSION__/$VERSION/" -e "s/__BUILD__/$BUILD/" -e "s|__SU_PUBLIC_ED_KEY__|$PUBLIC_KEY|" Resources/Info.plist > "$APP/Contents/Info.plist"
 if [ -z "$PUBLIC_KEY" ]; then
   # no update key yet: leave the updater off in this build

@@ -1,6 +1,7 @@
 import AppKit
 import ServiceManagement
 import Combine
+import SwiftUI
 import CleanpastaCore
 
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
@@ -9,9 +10,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var subscriptions = Set<AnyCancellable>()
     private var appearanceObservation: NSKeyValueObservation?
     let updater = Updater()
-    lazy var settings = SettingsWindowController(updater: updater)
+    lazy var settings = SettingsWindowController(updater: updater) { [weak self] in self?.showOnboarding() }
+    lazy var onboarding = OnboardingWindowController()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        BrandFont.register()
         CommandLineTool.moveToLocalBinIfNeeded()
         NSApp.mainMenu = MainMenu.build(target: self)
         AppIcon.apply()
@@ -30,7 +33,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let trusted = Clipboard.canPaste
         if preferences.isFirstLaunch {
             preferences.isFirstLaunch = false
-            settings.show()
+            onboarding.show()
         } else if !trusted && UserDefaults.standard.bool(forKey: "accessibilityWasAllowed") {
             // macOS drops the permission when an update changes the app's signature:
             // show the one-click way back instead of failing silently.
@@ -108,6 +111,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc func openSettings() { settings.show() }
 
+    func showOnboarding() { onboarding.show() }
+
     @objc func checkForUpdates() { updater.checkForUpdates() }
 
     lazy var about = AboutWindowController(updater: updater)
@@ -139,8 +144,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
-        // One icon in the menu bar; the menu below it holds the commands.
-        menu.addItem(.sectionHeader(title: "Cleanpasta"))
+        // One icon in the menu bar; the menu below it holds the commands, under a header as in Mowa.
+        let header = NSMenuItem()
+        header.view = MenuHeader.view(status: menuStatus)
+        menu.addItem(header)
+        menu.addItem(.separator())
         let paste = NSMenuItem(title: "Paste Clean", action: #selector(pasteCleanFromMenu), keyEquivalent: "")
         apply(preferences.pasteCleanShortcut, to: paste)
         paste.toolTip = "Clean the clipboard and paste it into the active app."
@@ -168,6 +176,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         for item in menu.items where item.action != #selector(NSApplication.terminate(_:)) && item.action != nil {
             item.target = self
         }
+    }
+
+    /// The line under the name in the menu: what the shortcut does now.
+    private var menuStatus: String {
+        guard Clipboard.canPaste else { return "Allow Accessibility to paste for you" }
+        guard let shortcut = preferences.pasteCleanShortcut else { return "Ready" }
+        return "Ready - \(shortcut.display) pastes clean"
     }
 
     private func apply(_ shortcut: Shortcut?, to item: NSMenuItem) {
@@ -254,6 +269,40 @@ enum DockIcon {
         reasons.remove(reason)
         if reasons.isEmpty {
             NSApp.setActivationPolicy(.accessory)
+        }
+    }
+}
+
+/// The top of the menu bar menu, as in Mowa: the icon, the name and a status line.
+enum MenuHeader {
+    static func view(status: String) -> NSView {
+        let hosting = NSHostingView(rootView: Content(status: status))
+        hosting.frame = NSRect(origin: .zero, size: hosting.fittingSize)
+        return hosting
+    }
+
+    private struct Content: View {
+        let status: String
+
+        var body: some View {
+            HStack(spacing: 10) {
+                Image(nsImage: NSApp.applicationIconImage)
+                    .resizable()
+                    .frame(width: 28, height: 28)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(verbatim: "Cleanpasta")
+                        .font(BrandFont.font(13, weight: .semibold))
+                    Text(status)
+                        .font(BrandFont.font(11))
+                        .foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 6)
+            .frame(minWidth: 260, alignment: .leading)
+            .accessibilityElement(children: .combine)
         }
     }
 }

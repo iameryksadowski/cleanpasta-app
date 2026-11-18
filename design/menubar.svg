@@ -1,8 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="335 340 354 354">
-  <!-- menu bar template: the clipboard of icon.svg, black on transparent (macOS tints it) -->
-  <rect x="386.6" y="373.4" width="250.8" height="303.6" rx="39.6" fill="none" stroke="#000000" stroke-width="27"/>
-  <rect x="456.824" y="347.0" width="110.352" height="59.4" rx="19.8" fill="#000000"/>
-  <line x1="441.776" y1="485.6" x2="582.224" y2="485.6" stroke="#000000" stroke-width="28" stroke-linecap="round"/>
-  <line x1="441.776" y1="538.4" x2="582.224" y2="538.4" stroke="#000000" stroke-width="24" stroke-linecap="round"/>
-  <line x1="441.776" y1="590.0" x2="537.08" y2="590.0" stroke="#000000" stroke-width="24" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="120 113 784 784">
+  <!-- menu bar template: the clipboard of icon.svg, black on transparent (macOS tints it); the gaps are cut out; about 14 pt tall in 18 pt, like Mowa -->
+  <defs>
+    <mask id="cut" maskUnits="userSpaceOnUse" x="120" y="113" width="784" height="784">
+      <rect x="282" y="270" width="460" height="540" rx="76" fill="#FFFFFF"/>
+      <rect x="402" y="214" width="220" height="112" rx="44" fill="#FFFFFF" stroke="#000000" stroke-width="28"/>
+      <rect x="356" y="420" width="312" height="68.23" rx="34.11" fill="#000000"/>
+      <rect x="356" y="530" width="312" height="68.23" rx="34.11" fill="#000000"/>
+      <rect x="356" y="640" width="186" height="68.23" rx="34.11" fill="#000000"/>
+    </mask>
+  </defs>
+  <g mask="url(#cut)">
+    <rect x="282" y="270" width="460" height="540" rx="76" fill="#000000"/>
+    <rect x="402" y="214" width="220" height="112" rx="44" fill="#000000"/>
+  </g>
 </svg>
