@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="172 165 680 680">
-  <!-- menu bar template: the clipboard of icon.svg, black on transparent (macOS tints it); the gaps are cut out -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="120 113 784 784">
+  <!-- menu bar template: the clipboard of icon.svg, black on transparent (macOS tints it); the gaps are cut out; about 14 pt tall in 18 pt, like Mowa -->
   <defs>
-    <mask id="cut" maskUnits="userSpaceOnUse" x="172" y="165" width="680" height="680">
+    <mask id="cut" maskUnits="userSpaceOnUse" x="120" y="113" width="784" height="784">
       <rect x="282" y="270" width="460" height="540" rx="76" fill="#FFFFFF"/>
       <rect x="402" y="214" width="220" height="112" rx="44" fill="#FFFFFF" stroke="#000000" stroke-width="28"/>
       <rect x="356" y="420" width="312" height="68.23" rx="34.11" fill="#000000"/>
