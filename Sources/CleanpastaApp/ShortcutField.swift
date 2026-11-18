@@ -26,12 +26,12 @@ struct ShortcutRow: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            ShortcutField(shortcut: $shortcut).frame(width: 150, height: 24)
+            ShortcutField(shortcut: $shortcut).frame(width: 150, height: 28)
             Button {
                 shortcut = nil
             } label: {
                 Image(systemName: "xmark.circle.fill")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Tokens.muted)
             }
             .buttonStyle(.plain)
             .help("Remove the shortcut")
@@ -47,7 +47,7 @@ final class RecorderView: NSView {
     var shortcut: Shortcut? { didSet { needsDisplay = true } }
     private(set) var isRecording = false { didSet { needsDisplay = true } }
 
-    override var intrinsicContentSize: NSSize { NSSize(width: 150, height: 24) }
+    override var intrinsicContentSize: NSSize { NSSize(width: 150, height: 28) }
     override var acceptsFirstResponder: Bool { true }
 
     override func mouseDown(with event: NSEvent) {
@@ -120,10 +120,10 @@ final class RecorderView: NSView {
 
     override func draw(_ dirtyRect: NSRect) {
         let rect = bounds.insetBy(dx: 0.5, dy: 0.5)
-        let path = NSBezierPath(roundedRect: rect, xRadius: 6, yRadius: 6)
-        (isRecording ? NSColor.controlAccentColor.withAlphaComponent(0.12) : NSColor.controlBackgroundColor).setFill()
+        let path = NSBezierPath(roundedRect: rect, xRadius: 8, yRadius: 8)
+        (isRecording ? Tokens.softPair.ns : Tokens.surfacePair.ns).setFill()
         path.fill()
-        (isRecording ? NSColor.controlAccentColor : NSColor.separatorColor).setStroke()
+        (isRecording ? Tokens.accentPair.ns : Tokens.controlBorderPair.ns).setStroke()
         path.lineWidth = 1
         path.stroke()
 
@@ -140,7 +140,8 @@ final class RecorderView: NSView {
             color = .tertiaryLabelColor
         }
         let attributes: [NSAttributedString.Key: Any] = [
-            .font: NSFont.systemFont(ofSize: 12, weight: shortcut != nil && !isRecording ? .medium : .regular),
+            .font: NSFont(name: shortcut != nil && !isRecording ? "Geist-Medium" : "Geist-Regular", size: 12)
+                ?? NSFont.systemFont(ofSize: 12, weight: shortcut != nil && !isRecording ? .medium : .regular),
             .foregroundColor: color,
         ]
         let size = text.size(withAttributes: attributes)

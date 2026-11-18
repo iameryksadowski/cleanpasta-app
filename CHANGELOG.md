@@ -8,7 +8,12 @@ Includes the fixes prepared as 1.1.1, which was never released.
 
 ### Changed
 
-- **Cleanpasta stands on its own.** The app is Cleanpasta and "Eryk Sadowski" is its signature in the About window and footers. The About window is simpler, the app icon is the green clipboard and the menu bar icon a plain clipboard.
+- **Cleanpasta stands on its own.** The app is Cleanpasta and "Eryk Sadowski" is its signature in the About window and footers.
+- **The look of Eryk Sadowski's apps, as in Mowa.** Geist type, the same colors, buttons and switches, Settings as cards, the About window and a menu bar menu with a header that says what the shortcut does now. A new icon: a clipboard with clean lines on the brand green (dark in dark mode), and the same clipboard in the menu bar.
+
+### Added
+
+- **An introduction at the first launch**, as in Mowa: a hello from Eryk, what Cleanpasta does, the Accessibility permission, the shortcut, a sample to paste clean and a last screen with what works and Open at login. Settings > General > Introduction shows it again.
 - **New identifiers.** Bundle identifier `com.eryksadowski.cleanpasta` (the command line tool: `com.eryksadowski.cleanpasta.cli`), signing certificate "Eryk Sadowski", repository `iameryksadowski/cleanpasta-app`. The update from 1.1.x installs as usual (it is signed with the same update key). Because the identifier and the signature change, it starts like a new installation: allow Accessibility once more, set your shortcuts and options again and turn Open at login back on in Settings if you use it.
 - **Updates come from `cleanpasta.eryksadowski.workers.dev`** (Cloudflare), like the other apps by Eryk Sadowski. Every version is still published on GitHub Releases too.
 - **The command line tool lives in `~/.local/bin`**, like the other apps by Eryk Sadowski. A `cleanpasta` link from 1.1.x in `/opt/homebrew/bin` or `/usr/local/bin` moves there by itself; the old link is removed only once a new Terminal finds `~/.local/bin`, and Settings show the command that adds it to the PATH.
