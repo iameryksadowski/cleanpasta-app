@@ -12,10 +12,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     lazy var settings = SettingsWindowController(updater: updater)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        if Migration.renameBundleIfNeeded() {
-            return // the renamed copy starts in a moment
-        }
-        Migration.afterRename()
+        CommandLineTool.moveToLocalBinIfNeeded()
         NSApp.mainMenu = MainMenu.build(target: self)
         AppIcon.apply()
         appearanceObservation = NSApp.observe(\.effectiveAppearance) { _, _ in
@@ -257,84 +254,6 @@ enum DockIcon {
         reasons.remove(reason)
         if reasons.isEmpty {
             NSApp.setActivationPolicy(.accessory)
-        }
-    }
-}
-
-/// Legacy migration from the 1.0.x app name to "Cleanpasta" (1.1.0). Sparkle installs the update
-/// under the old file name, so the app renames itself once and moves the rest along.
-/// Keep it while 1.0.x installations may still update; the old names below exist only for that.
-enum Migration {
-    static let oldBundleName = "Clean Paste.app"
-    static let newBundleName = "Cleanpasta.app"
-
-    /// Renames "Clean Paste.app" to "Cleanpasta.app" next to it and relaunches from there.
-    /// Returns true when the renamed copy is starting and this process is about to quit.
-    static func renameBundleIfNeeded() -> Bool {
-        let current = Bundle.main.bundleURL
-        guard current.lastPathComponent == oldBundleName else { return false }
-        let target = current.deletingLastPathComponent().appendingPathComponent(newBundleName)
-        let fm = FileManager.default
-        guard !fm.fileExists(atPath: target.path) else { return false }
-        do {
-            try fm.moveItem(at: current, to: target)
-        } catch {
-            NSLog("Cleanpasta: could not rename the app: %@", error.localizedDescription)
-            return false
-        }
-        let configuration = NSWorkspace.OpenConfiguration()
-        configuration.createsNewApplicationInstance = true
-        NSWorkspace.shared.openApplication(at: target, configuration: configuration) { _, _ in
-            DispatchQueue.main.async { NSApp.terminate(nil) }
-        }
-        return true
-    }
-
-    /// Once after the rename: the command line tool link and the login item follow the new name.
-    static func afterRename() {
-        let defaults = UserDefaults.standard
-        guard !defaults.bool(forKey: "migratedToCleanpasta") else { return }
-        let fm = FileManager.default
-        var legacyLinks: [URL] = []
-        for folder in CommandLineTool.candidateFolders {
-            let old = folder.appendingPathComponent("cleanpaste")
-            if let destination = try? fm.destinationOfSymbolicLink(atPath: old.path), destination.contains("/" + oldBundleName + "/") || destination.contains("/" + newBundleName + "/") {
-                legacyLinks.append(old)
-            }
-        }
-        if !legacyLinks.isEmpty {
-            do {
-                try CLIInstallation.migrate(legacyLinks: legacyLinks, helper: CommandLineTool.helper, folder: CommandLineTool.targetFolder)
-            } catch {
-                NSLog("Cleanpasta: command line migration will retry: %@", error.localizedDescription)
-                return
-            }
-        }
-        if SMAppService.mainApp.status == .enabled {
-            try? SMAppService.mainApp.unregister()
-            try? SMAppService.mainApp.register()
-        }
-        defaults.set(true, forKey: "migratedToCleanpasta")
-    }
-}
-
-/// Legacy migration of the settings to the new defaults domain (1.2.0 renamed the bundle identifier).
-/// Copies the app's own keys once, when the new domain is still empty. The old domain stays untouched.
-enum LegacyDefaults {
-    static let oldDomain = "com.eryksadowski.estools.cleanpaste" // legacy migration
-    static let newDomain = "com.eryksadowski.cleanpasta"
-    static let keys = [
-        "replaceDashes", "replaceQuotes", "fontSize", "pasteCleanShortcut", "repairShortcut",
-        "showFeedback", "launchedBefore", "accessibilityWasAllowed", "migratedToCleanpasta",
-    ]
-
-    static func migrateIfNeeded() {
-        let defaults = UserDefaults.standard
-        let domain = Bundle.main.bundleIdentifier ?? newDomain
-        guard domain == newDomain, defaults.persistentDomain(forName: domain)?.isEmpty ?? true else { return }
-        guard let old = defaults.persistentDomain(forName: oldDomain), !old.isEmpty else { return }
-        for key in keys {
-            if let value = old[key] { defaults.set(value, forKey: key) }
         }
     }
 }

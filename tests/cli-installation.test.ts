@@ -28,21 +28,31 @@ try fm.createSymbolicLink(atPath: link.path, withDestinationPath: "/other/tool")
 do { try CLIInstallation.install(helper: helper, folder: folder); fatalError("overwrote unrelated link") } catch {}
 precondition(try! fm.destinationOfSymbolicLink(atPath: link.path) == "/other/tool")
 try fm.removeItem(at: link)
-// Legacy migration: links into a 1.0.x bundle and the old cleanpaste command.
-try fm.createSymbolicLink(atPath: link.path, withDestinationPath: root.appendingPathComponent("Clean Paste.app/Contents/Helpers/cleanpaste").path)
+// A link into another copy of Cleanpasta is ours to replace.
+try fm.createSymbolicLink(atPath: link.path, withDestinationPath: root.appendingPathComponent("old/Cleanpasta.app/Contents/Helpers/cleanpasta").path)
 try CLIInstallation.install(helper: helper, folder: folder)
 precondition(try! fm.destinationOfSymbolicLink(atPath: link.path) == helper.path)
 try CLIInstallation.install(helper: helper, folder: folder)
-let legacy = folder.appendingPathComponent("cleanpaste")
-try fm.createSymbolicLink(atPath: legacy.path, withDestinationPath: helper.path)
-try fm.removeItem(at: link)
-try Data("another tool".utf8).write(to: link)
-do { try CLIInstallation.migrate(legacyLinks: [legacy], helper: helper, folder: folder); fatalError("migration must fail") } catch {}
-precondition((try? fm.destinationOfSymbolicLink(atPath: legacy.path)) != nil, "failed migration removed the old command")
-try fm.removeItem(at: link)
-try CLIInstallation.migrate(legacyLinks: [legacy], helper: helper, folder: folder)
-precondition((try? fm.destinationOfSymbolicLink(atPath: legacy.path)) == nil)
-precondition(try! fm.destinationOfSymbolicLink(atPath: link.path) == helper.path)
+// 1.2.0: a link from 1.1.x moves to ~/.local/bin; the old one goes only once the shell finds the new folder.
+let localBin = root.appendingPathComponent("home/.local/bin")
+let elsewhere = root.appendingPathComponent("elsewhere")
+try fm.createDirectory(at: elsewhere, withIntermediateDirectories: true)
+try fm.createSymbolicLink(atPath: elsewhere.appendingPathComponent("cleanpasta").path, withDestinationPath: "/other/tool")
+var left = try CLIInstallation.moveToLocalBin(previousFolders: [folder, elsewhere], helper: helper, localBin: localBin, removeOld: false)
+precondition(left == [link], "only our link is a candidate")
+precondition(try! fm.destinationOfSymbolicLink(atPath: localBin.appendingPathComponent("cleanpasta").path) == helper.path)
+precondition((try? fm.destinationOfSymbolicLink(atPath: link.path)) != nil, "old link kept while ~/.local/bin is not on PATH")
+left = try CLIInstallation.moveToLocalBin(previousFolders: [folder, elsewhere], helper: helper, localBin: localBin, removeOld: true)
+precondition(left.isEmpty && (try? fm.destinationOfSymbolicLink(atPath: link.path)) == nil)
+precondition(try! fm.destinationOfSymbolicLink(atPath: elsewhere.appendingPathComponent("cleanpasta").path) == "/other/tool")
+precondition(try! CLIInstallation.moveToLocalBin(previousFolders: [folder], helper: helper, localBin: localBin, removeOld: true).isEmpty)
+let home = root.appendingPathComponent("home")
+precondition(!CLIInstallation.isOnShellPath(localBin, home: home, environmentPath: "/usr/bin:/bin"))
+precondition(CLIInstallation.isOnShellPath(localBin, home: home, environmentPath: "/usr/bin:" + localBin.path))
+try Data("# export PATH=$HOME/.local/bin:$PATH\\n".utf8).write(to: home.appendingPathComponent(".zshrc"))
+precondition(!CLIInstallation.isOnShellPath(localBin, home: home, environmentPath: ""), "a comment does not count")
+try Data("export PATH=\\"$HOME/.local/bin:$PATH\\"\\n".utf8).write(to: home.appendingPathComponent(".zprofile"))
+precondition(CLIInstallation.isOnShellPath(localBin, home: home, environmentPath: ""))
 `);
     const binary = join(dir, 'test-install');
     execFileSync('xcrun', ['swiftc', '-module-cache-path', process.env.CLANG_MODULE_CACHE_PATH ?? join(dir, 'cache'), 'Sources/CleanpastaCore/CLIInstallation.swift', harness, '-o', binary], { timeout: 180000 });
