@@ -1,13 +1,13 @@
 import AppKit
 import CleanpastaCore
 
-// cleanpasta - the ES Tools Cleanpasta command line tool. Same cleaning as the app
-// and the Raycast extension; meant for people, scripts and AI assistants.
+// cleanpasta - the Cleanpasta command line tool. Same cleaning as the app;
+// meant for people, scripts and AI assistants.
 
-let version = "1.1.0"
+let version = "1.2.0"
 
 let usage = """
-cleanpasta \(version) - ES Tools Cleanpasta
+cleanpasta \(version) - Cleanpasta
 
 Cleans formatted text: keeps bold, italic, links, lists, line breaks and non-breaking
 spaces; drops backgrounds, colors and fonts; turns Markdown into formatted text and
@@ -61,7 +61,8 @@ var paste = false
 var repair = false
 var printFormat: String?
 // Defaults follow the app's settings, so the CLI and the app clean the same way.
-let appDefaults = UserDefaults(suiteName: "com.eryksadowski.estools.cleanpaste")
+// The suite is the app's bundle identifier (see Resources/Info.plist).
+let appDefaults = UserDefaults(suiteName: "com.eryksadowski.cleanpasta")
 var options = CleanOptions(
     replaceDashes: appDefaults?.object(forKey: "replaceDashes") as? Bool ?? true,
     replaceQuotes: appDefaults?.object(forKey: "replaceQuotes") as? Bool ?? true,
@@ -123,7 +124,9 @@ if let file, file != "-" {
     if kind == .auto { kind = ["md", "markdown"].contains(ext) ? .markdown : ["html", "htm"].contains(ext) ? .html : .text }
     assign(content)
 } else if !repair && (file == "-" || isatty(FileHandle.standardInput.fileDescriptor) == 0) {
-    assign(String(decoding: FileHandle.standardInput.readDataToEndOfFile(), as: UTF8.self))
+    let data = FileHandle.standardInput.readDataToEndOfFile()
+    guard let content = String(data: data, encoding: .utf8) else { fail("standard input is not valid UTF-8") }
+    assign(content)
 } else {
     let clipboard = Clipboard.read()
     switch kind {

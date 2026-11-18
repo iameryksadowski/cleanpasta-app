@@ -1,7 +1,7 @@
 import Foundation
 import JavaScriptCore
 
-/// Cleaning options, the same as the Raycast extension's preferences.
+/// Cleaning options, the same in the app, the CLI and the settings.
 public struct CleanOptions: Equatable {
     /// Replace em dashes, en dashes and similar with a plain hyphen "-".
     public var replaceDashes: Bool
@@ -24,15 +24,14 @@ public struct CleanResult: Equatable {
     public let text: String
 }
 
-/// Runs the converter shared with the Raycast extension (Resources/convert.js, built
-/// from src/lib/convert.ts) in JavaScriptCore, so every ES Tools Cleanpasta product
-/// cleans text the same way.
+/// Runs the shared converter (Resources/convert.js, built from converter/src/convert.ts)
+/// in JavaScriptCore, so the app, the CLI and the Windows version clean text the same way.
 public final class Converter {
     public static let shared = Converter()
 
     public enum Input {
         /// Clipboard-like content: rich HTML wins, plain text is read as Markdown only
-        /// when it clearly is Markdown (the same rule as the Raycast extension).
+        /// when it clearly is Markdown.
         case content(html: String?, text: String?)
         /// Markdown source, e.g. a draft written by an AI assistant.
         case markdown(String)

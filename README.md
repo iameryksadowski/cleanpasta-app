@@ -1,8 +1,15 @@
-![ES Tools](design/icon-1024.png)
+![Cleanpasta](design/icon-1024.png)
 
-# ES Tools Cleanpasta
+# Cleanpasta
 
 A menu bar app for macOS that pastes formatted text without the background, colors and fonts it was copied with. Bold, italic, links, lists, line breaks and non-breaking spaces stay, and the text takes the style of wherever you paste it: Mail, Gmail, Slack, Notes, Word or any other app.
+
+## Status
+
+- Version **1.2.0** (2026-11-18): the look of Eryk Sadowski's apps, an introduction at the first launch, a new icon, updates from Cloudflare. Latest release: [GitHub Releases](https://github.com/iameryksadowski/cleanpasta-app/releases/latest). History: [CHANGELOG](CHANGELOG.md).
+- `main` holds released versions; work happens on `development` and reaches `main` through a pull request.
+- Updates come from Cloudflare (`cleanpasta.eryksadowski.workers.dev`, the Worker in `services/updates`), signed with EdDSA; every version is also on GitHub Releases.
+- Plan, decisions and release steps (in Polish): [docs/](docs/README.md).
 
 ## What it does
 
@@ -18,14 +25,22 @@ A menu bar app for macOS that pastes formatted text without the background, colo
 ## Install
 
 ```bash
-curl -fsSL https://github.com/iameryksadowski/estools-app-cleanpasta/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/iameryksadowski/cleanpasta-app/releases/latest/download/install.sh | sh
 ```
 
-Or download the DMG from [Releases](https://github.com/iameryksadowski/estools-app-cleanpasta/releases/latest), drag Cleanpasta to Applications and allow it once in System Settings > Privacy & Security ("Open Anyway"). Then allow Accessibility when the app asks: Cleanpasta presses Cmd+V for you. Requires macOS 14 or later. Polish guide: [docs/instalacja.md](docs/instalacja.md).
+Or download the DMG from [Releases](https://github.com/iameryksadowski/cleanpasta-app/releases/latest), drag Cleanpasta to Applications and allow it once in System Settings > Privacy & Security ("Open Anyway"). Then allow Accessibility when the app asks: Cleanpasta presses Cmd+V for you. Requires macOS 14 or later. Polish guide: [docs/instalacja.md](docs/instalacja.md).
+
+## Windows preview
+
+A Windows tray app and `cleanpasta.exe` CLI are being developed in the same repository, under `windows/`. They use Tauri 2 and an embedded QuickJS engine running the same converter bundle as macOS, without Node on the user's machine.
+
+Download the `cleanpasta-windows-x64-preview` artifact from a successful [Windows workflow run](https://github.com/iameryksadowski/cleanpasta-app/actions/workflows/windows.yml). It contains a per-user NSIS installer and the CLI. This is an unsigned test build; SmartScreen or organizational policies may warn or block it. It is not a published release.
+
+Paste Clean defaults to Ctrl+Alt+Shift+V. The tray also offers Repair Clipboard, Settings, About and Quit. Settings include formatting, shortcuts, autostart and CLI installation to the user PATH. Signed updates require Eryk's public key and feed before release. Architecture, build commands, signing choices and the manual test checklist: [docs/windows.md](docs/windows.md).
 
 ## Command line and AI assistants
 
-Settings > General > Command line tool installs `cleanpasta`:
+Settings > General > Command line tool installs `cleanpasta` as a link in `~/.local/bin`:
 
 ```bash
 cleanpasta draft.md --body --copy       # a Markdown draft to the clipboard, ready for Cmd+V
@@ -33,26 +48,30 @@ pbpaste | cleanpasta --text --print text
 cleanpasta --repair                     # fix the clipboard, then paste anywhere
 ```
 
-`cleanpasta --help` lists every option. The `skills/cleanpasta` skill teaches Claude to hand over drafts through `cleanpasta --copy`, so they paste already formatted.
-
-**Raycast:** Settings > General > Add to Raycast saves the commands as Raycast Quicklinks and opens Raycast; there, run Import Quicklinks and pick "Cleanpasta for Raycast.json" in Downloads. The links work in any launcher or script: `cleanpasta://paste`, `://repair`, `://settings`, `://about`.
+`cleanpasta --help` lists every option; `--paste` and `--repair` do the same as the shortcuts, for scripts and launchers. The `skills/cleanpasta` skill teaches Claude to hand over drafts through `cleanpasta --copy`, so they paste already formatted.
 
 ## How it works
 
 The cleaning logic lives in `converter/` (TypeScript, with unit tests and paste tests in the WebKit editor behind the Apple Mail compose window); it is bundled into `Resources/convert.js` and runs in JavaScriptCore, so the app and the CLI clean text the same way. The clipboard is read natively (HTML, web archive, RTF, plain text) and written back as HTML and plain text; Cmd+V is sent after the shortcut's modifier keys are released, so Mail never turns it into Paste and Match Style.
 
-Updates use [Sparkle](https://sparkle-project.org) with an EdDSA signature; the app is signed with the "ES Tools Code Signing" certificate, so Accessibility stays allowed across updates. No Apple developer account is involved.
+Updates use [Sparkle](https://sparkle-project.org) with an EdDSA signature; the app is signed with the "Eryk Sadowski" certificate, so Accessibility stays allowed across updates. No Apple developer account is involved.
 
 ## Development
 
-- `scripts/test.sh` - builds the CLI and checks JavaScriptCore against the TypeScript converter (needs the Raycast extension next to this repo with `npm install` done).
-- `scripts/build-converter.sh` - rebuilds `Resources/convert.js` after a converter change in the extension.
-- `scripts/make-icon.sh` - `design/icon.svg` (light) and `design/icon-dark.svg` to the app icons.
+- `scripts/test.sh` - checks for typographic dashes and quotes, runs the converter tests, builds the CLI and checks JavaScriptCore against the TypeScript converter (run `pnpm install` in `converter/` first).
+- `scripts/build-converter.sh` - rebuilds `Resources/convert.js` after a change in `converter/src/convert.ts`.
+- `scripts/make-icon.sh` - `design/icon.svg` (light), `design/icon-dark.svg` and `design/menubar.svg` to the app and menu bar icons.
 - `scripts/build-app.sh` - `dist/Cleanpasta.app`, zip and DMG (universal: Apple silicon and Intel).
-- `scripts/setup-signing.sh` - one-time signing certificate and update key on the release Mac.
-- `scripts/release.sh` - GitHub release with the zip, DMG, `appcast.xml` and `install.sh`.
-- Plan and decisions: [docs/plan.md](docs/plan.md). Changes: [CHANGELOG.md](CHANGELOG.md).
+- `scripts/make-update-key.sh --check` - checks that the private update key fits the public key built into the app. The key exists since 1.0.0 and is never replaced.
+- `scripts/release.sh` - GitHub release with the zip, DMG, `appcast.xml` and `install.sh`; signed with the "Eryk Sadowski" certificate shared by Eryk Sadowski's apps.
+- In a restricted environment without macOS pasteboard/WebKit services, `CLEANPASTA_SKIP_PASTE_TESTS=1 scripts/test.sh` explicitly skips editor paste tests. This checks conversion and CLI behavior only; run the default suite on a normal Mac before release.
+- `CODE_SIGN_IDENTITY=- scripts/build-app.sh` builds an ad-hoc test package without querying the signing keychain. Release builds require the persistent signing certificate.
+- Documents (in Polish): [docs/README.md](docs/README.md) - decisions, roadmap, build and release. Changes: [CHANGELOG.md](CHANGELOG.md).
+
+## License
+
+The code is MIT licensed ([LICENSE](LICENSE)). Geist is under the SIL Open Font License ([Resources/Fonts/OFL.txt](Resources/Fonts/OFL.txt)). The photo of Eryk Sadowski (`Resources/Onboarding/eryk.jpg`) and the Cleanpasta icon are not covered by the MIT license.
 
 ---
 
-ES Tools by Eryk Sadowski · eryksadowski.com
+Eryk Sadowski · eryksadowski.com

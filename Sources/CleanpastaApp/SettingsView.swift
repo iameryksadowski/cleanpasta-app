@@ -1,24 +1,30 @@
 import AppKit
 import ServiceManagement
 import SwiftUI
+import CleanpastaCore
 
 /// The settings window. While it is open the app has a Dock icon; closing it puts the
 /// app back into the menu bar only.
 final class SettingsWindowController: NSObject, NSWindowDelegate {
     private var window: NSWindow?
     private let updater: Updater
+    private let onboarding: () -> Void
 
-    init(updater: Updater) {
+    init(updater: Updater, onboarding: @escaping () -> Void) {
         self.updater = updater
+        self.onboarding = onboarding
     }
 
     func show() {
         DockIcon.show("settings")
         if window == nil {
-            let hosting = NSHostingController(rootView: SettingsView(updater: updater))
+            let hosting = NSHostingController(rootView: SettingsView(updater: updater, onboarding: onboarding))
+            hosting.sizingOptions = []
             let window = NSWindow(contentViewController: hosting)
-            window.title = "Cleanpasta"
-            window.styleMask = [.titled, .closable, .miniaturizable]
+            window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
+            WindowChrome.apply(to: window, title: "Cleanpasta Settings")
+            window.setContentSize(NSSize(width: 580, height: 700))
+            window.contentMinSize = NSSize(width: 520, height: 420)
             window.isReleasedWhenClosed = false
             window.delegate = self
             window.center()
@@ -37,13 +43,12 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
 struct SettingsView: View {
     @ObservedObject private var preferences = Preferences.shared
     let updater: Updater
+    let onboarding: () -> Void
     @State private var trusted = AXIsProcessTrusted()
-    @State private var openAtLogin = SMAppService.mainApp.status == .enabled
+    @State private var openAtLogin = LoginItem.isOn
     @State private var loginError: String?
     @State private var autoUpdates = false
     @State private var cliStatus = CommandLineTool.status()
-    @State private var raycastNote: String?
-    @AppStorage("raycastEnabled") private var raycastEnabled = false
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     private var version: String {
@@ -52,195 +57,185 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        Form {
-            Section {
-                HStack(spacing: 14) {
-                    Image(nsImage: NSApp.applicationIconImage)
-                        .resizable()
-                        .frame(width: 56, height: 56)
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("Cleanpasta").font(.title2.weight(.semibold))
-                        Text("Paste formatted text without backgrounds, colors and fonts. Bold, lists, links and line breaks stay.")
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                }
-                .padding(.vertical, 4)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                header
+                if !trusted { permissionCard }
+                shortcuts
+                formatting
+                general
+                updates
+                footer
             }
-
-            if !trusted {
-                Section {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Label("One step left: allow Accessibility", systemImage: "hand.raised")
-                            .font(.headline)
-                        Text("Cleanpasta presses Cmd+V for you, and macOS asks for your permission. Click the button, turn on Cleanpasta in the list and come back here. After an update, if Cleanpasta is already on, turn it off and on again.")
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Button("Allow Accessibility") { Permissions.requestAccessibility() }
-                            .buttonStyle(.borderedProminent)
-                            .tint(Color(red: 0.020, green: 0.588, blue: 0.412))
-                    }
-                    .padding(.vertical, 4)
-                }
-            }
-
-            Section {
-                LabeledContent {
-                    ShortcutRow(shortcut: $preferences.pasteCleanShortcut)
-                } label: {
-                    Text("Paste Clean")
-                    Text("Cleans the clipboard and pastes it into the app you are in.")
-                }
-                LabeledContent {
-                    ShortcutRow(shortcut: $preferences.repairShortcut)
-                } label: {
-                    Text("Repair Clipboard")
-                    Text("Keeps the text and removes backgrounds, colors and fonts. Then paste with Cmd+V yourself.")
-                }
-                if preferences.shortcutConflict {
-                    Label("Another app already uses one of these shortcuts. Pick a different one.", systemImage: "exclamationmark.triangle")
-                        .foregroundStyle(.orange)
-                        .font(.callout)
-                }
-            } header: {
-                Text("Shortcuts")
-            } footer: {
-                Text("Click a field and press the keys. The x removes a shortcut - both commands always work from the menu bar icon, with or without one.")
-                    .foregroundStyle(.secondary)
-            }
-
-            Section("Formatting") {
-                Toggle(isOn: $preferences.replaceDashes) {
-                    Text("Replace em and en dashes")
-                    Text("Long dashes become a plain hyphen \"-\".")
-                }
-                Toggle(isOn: $preferences.replaceQuotes) {
-                    Text("Replace typographic quotes")
-                    Text("Curly and angle quotes, and the curly apostrophe, become \" and '.")
-                }
-                Picker(selection: $preferences.fontSize) {
-                    ForEach(Preferences.fontSizes, id: \.value) { size in
-                        Text(size.title).tag(size.value)
-                    }
-                } label: {
-                    Text("Font size")
-                    Text("Size of the pasted text. Without a size, Mail and Notes paste at 16 px.")
-                }
-            }
-
-            Section("General") {
-                Toggle(isOn: $openAtLogin) {
-                    Text("Open at login")
-                    if let loginError {
-                        Text(loginError).foregroundStyle(.orange)
-                    }
-                }
-                .onChange(of: openAtLogin) { _, enabled in setOpenAtLogin(enabled) }
-                Toggle(isOn: $preferences.showFeedback) {
-                    Text("Show a confirmation")
-                    Text("A short note on screen after Repair Clipboard.")
-                }
-                LabeledContent {
-                    if cliStatus.installed {
-                        Text(cliStatus.path).font(.system(.callout, design: .monospaced)).foregroundStyle(.secondary)
-                    } else {
-                        Button("Install") { cliStatus = CommandLineTool.install() }
-                    }
-                } label: {
-                    Text("Command line tool")
-                    Text(cliStatus.note ?? "cleanpasta for Terminal, scripts and AI assistants. See cleanpasta --help.")
-                }
-            }
-
-            Section {
-                if RaycastIntegration.isInstalled {
-                    Toggle(isOn: $raycastEnabled) {
-                        Text("Raycast commands")
-                        Text("Paste Clean, Repair Clipboard, Settings and About as commands in Raycast, so you can run them from Raycast or give them Raycast hotkeys.")
-                    }
-                    .onChange(of: raycastEnabled) { _, enabled in
-                        raycastNote = enabled ? RaycastIntegration.enable() : RaycastIntegration.disable()
-                    }
-                    if let raycastNote {
-                        Text(raycastNote)
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .textSelection(.enabled)
-                    }
-                } else {
-                    LabeledContent("Raycast commands") {
-                        Text("Raycast is not installed").foregroundStyle(.secondary)
-                    }
-                }
-            } header: {
-                Text("Raycast")
-            } footer: {
-                Text("Other launchers and scripts can use the links cleanpasta://paste, cleanpasta://repair, cleanpasta://settings and cleanpasta://about.")
-                    .foregroundStyle(.secondary)
-                    .textSelection(.enabled)
-            }
-
-            Section("Updates") {
-                Toggle("Check for updates automatically", isOn: $autoUpdates)
-                    .onChange(of: autoUpdates) { _, value in updater.automaticallyChecks = value }
-                    .disabled(!updater.isAvailable)
-                LabeledContent("Version \(version)") {
-                    Button("Check Now") { updater.checkForUpdates() }
-                }
-            }
-
-            Section {
-                LabeledContent("Accessibility") {
-                    if trusted {
-                        Label("Allowed", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
-                    } else {
-                        Button("Open Settings") { Permissions.requestAccessibility() }
-                    }
-                }
-            } header: {
-                Text("Permission")
-            } footer: {
-                HStack {
-                    Text("ES Tools by Eryk Sadowski")
-                    Spacer()
-                    Link("eryksadowski.com", destination: URL(string: "https://eryksadowski.com")!)
-                }
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .padding(.top, 6)
-            }
+            .padding(.horizontal, 32)
+            .padding(.top, 8)
+            .padding(.bottom, 24)
         }
-        .formStyle(.grouped)
-        // fits a 13-inch screen; the form scrolls
-        .frame(width: 520, height: 660)
+        .scrollBounceBehavior(.basedOnSize)
+        .background(Tokens.bg)
+        .tint(Tokens.accent)
+        .frame(minWidth: 520, minHeight: 420)
         .onAppear {
             autoUpdates = updater.automaticallyChecks
             cliStatus = CommandLineTool.status()
+            openAtLogin = LoginItem.isOn
         }
         .onReceive(timer) { _ in
             trusted = AXIsProcessTrusted()
         }
     }
 
-    private func setOpenAtLogin(_ enabled: Bool) {
-        do {
-            if enabled {
-                try SMAppService.mainApp.register()
-            } else {
-                try SMAppService.mainApp.unregister()
+    private var header: some View {
+        HStack(spacing: 16) {
+            Image(nsImage: NSApp.applicationIconImage)
+                .resizable()
+                .frame(width: 64, height: 64)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Cleanpasta")
+                    .textStyle(.title1)
+                    .foregroundStyle(Tokens.text)
+                    .accessibilityAddTraits(.isHeader)
+                Text("Paste formatted text without backgrounds, colors and fonts. Bold, lists, links and line breaks stay.")
+                    .textStyle(.body)
+                    .foregroundStyle(Tokens.mutedOnFill)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            loginError = nil
-        } catch {
-            loginError = "Could not change it: \(error.localizedDescription)"
         }
-        openAtLogin = SMAppService.mainApp.status == .enabled
+    }
+
+    private var permissionCard: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "hand.raised")
+                .font(.system(size: 17))
+                .foregroundStyle(Tokens.ink)
+                .frame(width: 36, height: 36)
+                .background(Tokens.soft, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("One step left: allow Accessibility")
+                    .textStyle(.bodyLarge, weight: .semibold)
+                    .foregroundStyle(Tokens.text)
+                Text("Cleanpasta presses Cmd+V for you, and macOS asks for your permission. Click the button, turn on Cleanpasta in the list and come back here. An older Cleanpasta in the list: remove it with the minus button first.")
+                    .textStyle(.body)
+                    .foregroundStyle(Tokens.mutedOnFill)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button("Allow Accessibility") { Permissions.requestAccessibility() }
+                    .buttonStyle(.brandPrimary)
+                    .padding(.top, 4)
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .card()
+    }
+
+    private var shortcuts: some View {
+        SettingSection(title: "Shortcuts",
+                       footer: "Click a field and press the keys. The x removes a shortcut; both commands always work from the menu bar icon.") {
+            SettingRow(title: "Paste Clean", detail: "Cleans the clipboard and pastes it into the app you are in.") {
+                ShortcutRow(shortcut: $preferences.pasteCleanShortcut)
+            }
+            SettingRow(title: "Repair Clipboard", detail: "Keeps the text and removes backgrounds, colors and fonts. Then paste with Cmd+V yourself.") {
+                ShortcutRow(shortcut: $preferences.repairShortcut)
+            }
+            if preferences.shortcutConflict {
+                StatusLine(ok: false, text: "Another app already uses one of these shortcuts. Pick a different one.")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+            }
+        }
+    }
+
+    private var formatting: some View {
+        SettingSection(title: "Formatting") {
+            SettingRow(title: "Replace em and en dashes", detail: "Long dashes become a plain hyphen \"-\".") {
+                Toggle("Replace em and en dashes", isOn: $preferences.replaceDashes).toggleStyle(BrandSwitchStyle())
+            }
+            SettingRow(title: "Replace typographic quotes", detail: "Curly and angle quotes, and the curly apostrophe, become \" and '.") {
+                Toggle("Replace typographic quotes", isOn: $preferences.replaceQuotes).toggleStyle(BrandSwitchStyle())
+            }
+            SettingRow(title: "Font size", detail: "Size of the pasted text. Without a size, Mail and Notes paste at 16 px.") {
+                Picker("Font size", selection: $preferences.fontSize) {
+                    ForEach(Preferences.fontSizes, id: \.value) { size in
+                        Text(size.title).tag(size.value)
+                    }
+                }
+                .labelsHidden()
+                .pickerStyle(.menu)
+                .fixedSize()
+            }
+        }
+    }
+
+    private var general: some View {
+        SettingSection(title: "General") {
+            SettingRow(title: "Open at login", detail: loginError ?? "The shortcut works right after the Mac starts.") {
+                Toggle("Open at login", isOn: $openAtLogin)
+                    .toggleStyle(BrandSwitchStyle())
+                    .onChange(of: openAtLogin) { _, enabled in
+                        loginError = LoginItem.set(enabled)
+                        openAtLogin = LoginItem.isOn
+                    }
+            }
+            SettingRow(title: "Show a confirmation", detail: "A short note on screen after Repair Clipboard.") {
+                Toggle("Show a confirmation", isOn: $preferences.showFeedback).toggleStyle(BrandSwitchStyle())
+            }
+            SettingRow(title: "Command line tool",
+                       detail: cliStatus.note ?? (cliStatus.installed ? cliStatus.path : "cleanpasta for Terminal, scripts and AI assistants. See cleanpasta --help.")) {
+                if cliStatus.installed {
+                    StatusLine(ok: true, text: "Installed")
+                } else {
+                    Button("Install") { cliStatus = CommandLineTool.install() }
+                        .buttonStyle(.brandSecondary)
+                }
+            }
+            SettingRow(title: "Accessibility", detail: "Lets Cleanpasta press Cmd+V for you.") {
+                if trusted {
+                    StatusLine(ok: true, text: "Allowed")
+                } else {
+                    Button("Open Settings") { Permissions.requestAccessibility() }
+                        .buttonStyle(.brandSecondary)
+                }
+            }
+            SettingRow(title: "Introduction", detail: "The short tour from the first launch.") {
+                Button("Show") { onboarding() }
+                    .buttonStyle(.brandSecondary)
+            }
+        }
+    }
+
+    private var updates: some View {
+        SettingSection(title: "Updates") {
+            SettingRow(title: "Check for updates automatically", detail: "Once a day. Updates install after you agree.") {
+                Toggle("Check for updates automatically", isOn: $autoUpdates)
+                    .toggleStyle(BrandSwitchStyle())
+                    .onChange(of: autoUpdates) { _, value in updater.automaticallyChecks = value }
+                    .disabled(!updater.isAvailable)
+            }
+            SettingRow(title: "Version \(version)") {
+                Button("Check Now") { updater.checkForUpdates() }
+                    .buttonStyle(.brandSecondary)
+            }
+        }
+    }
+
+    private var footer: some View {
+        HStack(spacing: 6) {
+            Circle().fill(Tokens.brand).frame(width: 6, height: 6).accessibilityHidden(true)
+            Text(verbatim: "Eryk Sadowski")
+            Spacer()
+            Link("eryksadowski.com", destination: Links.website)
+                .foregroundStyle(Tokens.ink)
+        }
+        .textStyle(.small)
+        .foregroundStyle(Tokens.mutedOnFill)
+        .padding(.horizontal, 4)
     }
 }
 
-/// Links Contents/Helpers/cleanpasta into a folder on the PATH, without an admin password.
+/// Links Contents/Helpers/cleanpasta into ~/.local/bin, without an admin password (like Mowa).
 enum CommandLineTool {
     struct Status {
         var installed: Bool
@@ -248,26 +243,27 @@ enum CommandLineTool {
         var note: String?
     }
 
+    static let addToPathCommand = "echo 'export PATH=\"$HOME/.local/bin:$PATH\"' >> ~/.zprofile"
+
     static var helper: URL { Bundle.main.bundleURL.appendingPathComponent("Contents/Helpers/cleanpasta") }
 
-    static var candidateFolders: [URL] {
-        ["/opt/homebrew/bin", "/usr/local/bin"].map { URL(fileURLWithPath: $0) }
-            + [FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".local/bin")]
-    }
+    private static var home: URL { FileManager.default.homeDirectoryForCurrentUser }
 
-    /// Homebrew's folder is on the PATH and writable without a password; ~/.local/bin otherwise.
-    static var targetFolder: URL {
-        let fm = FileManager.default
-        for folder in ["/opt/homebrew/bin", "/usr/local/bin"] where fm.isWritableFile(atPath: folder) {
-            return URL(fileURLWithPath: folder)
-        }
-        return fm.homeDirectoryForCurrentUser.appendingPathComponent(".local/bin")
+    static var targetFolder: URL { home.appendingPathComponent(".local/bin") }
+
+    /// Where 1.1.x and earlier linked the command.
+    static var previousFolders: [URL] { ["/opt/homebrew/bin", "/usr/local/bin"].map { URL(fileURLWithPath: $0) } }
+
+    static var targetIsOnPath: Bool {
+        CLIInstallation.isOnShellPath(targetFolder, home: home, environmentPath: ProcessInfo.processInfo.environment["PATH"] ?? "")
     }
 
     static func status() -> Status {
         let link = targetFolder.appendingPathComponent("cleanpasta")
         let destination = try? FileManager.default.destinationOfSymbolicLink(atPath: link.path)
-        return Status(installed: destination == helper.path, path: link.path.replacingOccurrences(of: NSHomeDirectory(), with: "~"))
+        let installed = destination == helper.path
+        let note = installed && !targetIsOnPath ? "Installed. Add ~/.local/bin to your PATH: \(addToPathCommand)" : nil
+        return Status(installed: installed, path: link.path.replacingOccurrences(of: NSHomeDirectory(), with: "~"), note: note)
     }
 
     static func install() -> Status {
@@ -275,60 +271,23 @@ enum CommandLineTool {
         guard fm.fileExists(atPath: helper.path) else {
             return Status(installed: false, path: "", note: "The command line tool is missing from this build.")
         }
-        let folder = targetFolder
-        let link = folder.appendingPathComponent("cleanpasta")
         do {
-            try fm.createDirectory(at: folder, withIntermediateDirectories: true)
-            if (try? fm.destinationOfSymbolicLink(atPath: link.path)) != nil || fm.fileExists(atPath: link.path) {
-                try fm.removeItem(at: link)
-            }
-            try fm.createSymbolicLink(at: link, withDestinationURL: helper)
+            try CLIInstallation.install(helper: helper, folder: targetFolder)
         } catch {
             return Status(installed: false, path: "", note: "Could not install: \(error.localizedDescription)")
         }
-        var result = status()
-        if folder.path.hasSuffix("/.local/bin") {
-            result.note = "Installed. Add ~/.local/bin to your PATH to use cleanpasta in Terminal."
-        }
-        return result
-    }
-}
-
-/// Raycast commands = Raycast Quicklinks that call Cleanpasta through its links
-/// (cleanpasta://...). Raycast has no public way to add them from outside, so Cleanpasta
-/// writes a file for Raycast's Import Quicklinks command and opens Raycast.
-enum RaycastIntegration {
-    static var raycastURL: URL? { NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.raycast.macos") }
-    static var isInstalled: Bool { raycastURL != nil }
-
-    static let quicklinks: [[String: String]] = [
-        ["name": "Cleanpasta: Paste Clean", "link": "cleanpasta://paste"],
-        ["name": "Cleanpasta: Repair Clipboard", "link": "cleanpasta://repair"],
-        ["name": "Cleanpasta: Settings", "link": "cleanpasta://settings"],
-        ["name": "Cleanpasta: About", "link": "cleanpasta://about"],
-    ]
-
-    static var fileURL: URL {
-        FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0].appendingPathComponent("Cleanpasta for Raycast.json")
+        return status()
     }
 
-    /// Writes the import file to Downloads, opens Raycast and returns the next steps.
-    static func enable() -> String {
+    /// At every launch until it is done: a link from 1.1.x moves to ~/.local/bin (CLIInstallation.moveToLocalBin).
+    static func moveToLocalBinIfNeeded() {
+        let defaults = UserDefaults.standard
+        guard !defaults.bool(forKey: "cliInLocalBin") else { return }
         do {
-            let data = try JSONSerialization.data(withJSONObject: quicklinks, options: [.prettyPrinted, .withoutEscapingSlashes])
-            try data.write(to: fileURL, options: .atomic)
+            let left = try CLIInstallation.moveToLocalBin(previousFolders: previousFolders, helper: helper, localBin: targetFolder, removeOld: targetIsOnPath)
+            if left.isEmpty { defaults.set(true, forKey: "cliInLocalBin") }
         } catch {
-            return "Could not write the file for Raycast: \(error.localizedDescription)"
+            NSLog("Cleanpasta: command line link stays where it is for now: %@", error.localizedDescription)
         }
-        if let raycastURL {
-            NSWorkspace.shared.openApplication(at: raycastURL, configuration: NSWorkspace.OpenConfiguration())
-        }
-        return "One step in Raycast: type Import Quicklinks, press Return and pick \"Cleanpasta for Raycast.json\" in Downloads. The commands start with \"Cleanpasta:\". Hotkeys for them: Raycast Settings > Extensions > Quicklinks."
-    }
-
-    /// Removes the import file and returns how to remove the commands from Raycast.
-    static func disable() -> String {
-        try? FileManager.default.removeItem(at: fileURL)
-        return "To remove the commands: in Raycast type Search Quicklinks, select a \"Cleanpasta:\" command, press Cmd+K and choose Delete Quicklink; repeat for each of them."
     }
 }

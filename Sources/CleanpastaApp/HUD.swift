@@ -19,7 +19,7 @@ enum HUD {
         let icon = NSImageView()
         icon.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)?
             .withSymbolConfiguration(.init(pointSize: 22, weight: .medium))
-        icon.contentTintColor = NSColor(red: 0.063, green: 0.725, blue: 0.506, alpha: 1) // ES accent #10B981
+        icon.contentTintColor = NSColor(hex: 0x10B981) // brand green
         content.addArrangedSubview(icon)
 
         let texts = NSStackView()
@@ -27,11 +27,11 @@ enum HUD {
         texts.alignment = .leading
         texts.spacing = 2
         let titleField = NSTextField(labelWithString: title)
-        titleField.font = .systemFont(ofSize: 14, weight: .semibold)
+        titleField.font = NSFont(name: "Geist-SemiBold", size: 14) ?? .systemFont(ofSize: 14, weight: .semibold)
         texts.addArrangedSubview(titleField)
         if let detail {
             let detailField = NSTextField(labelWithString: detail)
-            detailField.font = .systemFont(ofSize: 12)
+            detailField.font = NSFont(name: "Geist-Regular", size: 12) ?? .systemFont(ofSize: 12)
             detailField.textColor = .secondaryLabelColor
             texts.addArrangedSubview(detailField)
         }

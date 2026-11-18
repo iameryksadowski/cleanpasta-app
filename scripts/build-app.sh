@@ -1,8 +1,8 @@
 #!/bin/sh
 # Builds dist/Cleanpasta.app (menu bar app + cleanpasta CLI + Sparkle), signs it, and
 # packs dist/Cleanpasta-VERSION.zip and dist/Cleanpasta-VERSION.dmg.
-# Signing: the "ES Tools Code Signing" certificate when it is in the keychain
-# (scripts/setup-signing.sh), otherwise ad-hoc.
+# Signing: the "Eryk Sadowski" certificate when it is in the keychain (one certificate for all of
+# Eryk Sadowski's apps, docs/dystrybucja.md), otherwise ad-hoc.
 set -eu
 cd "$(dirname "$0")/.."
 # VERSION, BUILD and DIST can be overridden (e.g. a local update test)
@@ -11,18 +11,43 @@ BUILD="${BUILD:-$(git rev-list --count HEAD 2>/dev/null || echo 1)}"
 DIST="${DIST:-dist}"
 [ -n "$VERSION" ] || { echo "No version in CHANGELOG.md" >&2; exit 1; }
 APP="$DIST/Cleanpasta.app"
-IDENTITY="ES Tools Code Signing"
-security find-certificate -c "$IDENTITY" >/dev/null 2>&1 || IDENTITY="-"
+# SHA-1 of the code signing identity with exactly this name (as in Mowa's signing.sh): a name match
+# alone would also take "Eryk Sadowski Test". Without -v: a self-signed certificate has no trust
+# settings, so it is not "valid" for that listing, yet codesign signs with it.
+identity_hash() {
+  security find-identity -p codesigning 2>/dev/null | awk -v name="$1" '
+    /Valid identities only/ { exit }
+    { first = index($0, "\""); if (first == 0) next
+      rest = substr($0, first + 1); last = index(rest, "\"")
+      if (substr(rest, 1, last - 1) == name) { print $2; exit } }'
+}
+IDENTITY="${CODE_SIGN_IDENTITY:-Eryk Sadowski}"
+IDENTITY_NAME="$IDENTITY"
+if [ "$IDENTITY" != "-" ]; then
+  HASH="$(identity_hash "$IDENTITY")"
+  if [ -n "$HASH" ]; then
+    IDENTITY="$HASH"
+  else
+    [ "${REQUIRE_SIGNING:-0}" != "1" ] || { echo "Release signing certificate not found: $IDENTITY" >&2; exit 1; }
+    IDENTITY="-"
+  fi
+fi
+if [ "${REQUIRE_SIGNING:-0}" = "1" ] && [ "$IDENTITY" = "-" ]; then
+  echo "A release requires the Eryk Sadowski identity; ad-hoc signing is not allowed." >&2
+  exit 1
+fi
 PUBLIC_KEY="$(cat Resources/sparkle-public-key.txt 2>/dev/null || true)"
 
 echo "Building Cleanpasta $VERSION ($BUILD)"
 # Universal binaries (Apple silicon + Intel): build both slices and join them.
 # Each slice gets its own build folder: SPM cannot switch triples in one.
+BUILD_LOG="$(mktemp)"
+trap 'rm -f "$BUILD_LOG"' EXIT
 for arch in arm64 x86_64; do
-  swift build -c release --triple $arch-apple-macosx14.0 --build-path .build/$arch >/dev/null 2>&1 || {
-    swift build -c release --triple $arch-apple-macosx14.0 --build-path .build/$arch 2>&1 | grep -E "error" | grep -v PlatformPath >&2
+  if ! swift build -c release --triple $arch-apple-macosx14.0 --build-path .build/$arch >"$BUILD_LOG" 2>&1; then
+    cat "$BUILD_LOG" >&2
     exit 1
-  }
+  fi
 done
 BIN="$(mktemp -d)"
 for tool in CleanpastaApp cleanpasta; do
@@ -34,7 +59,8 @@ mkdir -p "$DIST"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/Helpers" "$APP/Contents/Frameworks"
 cp "$BIN/CleanpastaApp" "$APP/Contents/MacOS/CleanpastaApp"
 cp "$BIN/cleanpasta" "$APP/Contents/Helpers/cleanpasta"
-cp Resources/convert.js Resources/AppIcon.icns Resources/AppIcon-dark.png Resources/MenuBarIcon.png Resources/MenuBarIcon@2x.png Resources/ESToolsWordmark-dark.png Resources/ESToolsWordmark-light.png Resources/SadowskiWordmark-white.png "$APP/Contents/Resources/"
+cp Resources/convert.js Resources/AppIcon.icns Resources/AppIcon-dark.png Resources/MenuBarIcon.png Resources/MenuBarIcon@2x.png "$APP/Contents/Resources/"
+cp -R Resources/Fonts Resources/Onboarding "$APP/Contents/Resources/"
 sed -e "s/__VERSION__/$VERSION/" -e "s/__BUILD__/$BUILD/" -e "s|__SU_PUBLIC_ED_KEY__|$PUBLIC_KEY|" Resources/Info.plist > "$APP/Contents/Info.plist"
 if [ -z "$PUBLIC_KEY" ]; then
   # no update key yet: leave the updater off in this build
@@ -49,10 +75,11 @@ sign() { codesign --force --timestamp=none --sign "$IDENTITY" "$@"; }
 sign "$APP/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app"
 sign "$APP/Contents/Frameworks/Sparkle.framework/Versions/B/Autoupdate"
 sign "$APP/Contents/Frameworks/Sparkle.framework"
-sign --identifier com.eryksadowski.estools.cleanpaste.cli "$APP/Contents/Helpers/cleanpasta"
+# Identifier follows the app's bundle identifier.
+sign --identifier com.eryksadowski.cleanpasta.cli "$APP/Contents/Helpers/cleanpasta"
 sign "$APP"
 codesign --verify --deep --strict "$APP"
-echo "Signed with: $IDENTITY"
+if [ "$IDENTITY" = "-" ]; then echo "Signed ad-hoc"; else echo "Signed with: $IDENTITY_NAME ($IDENTITY)"; fi
 
 ZIP="$DIST/Cleanpasta-$VERSION.zip"
 rm -f "$ZIP"
@@ -66,6 +93,8 @@ ln -s /Applications "$STAGE/Applications"
 cp "docs/guide/Cleanpasta-instalacja.pdf" "$STAGE/Jak zainstalować.pdf" 2>/dev/null || cp docs/instalacja.md "$STAGE/Jak zainstalowac.txt"
 rm -f "$DMG"
 hdiutil create -quiet -volname "Cleanpasta $VERSION" -srcfolder "$STAGE" -format UDZO -ov "$DMG"
+# A build lying around must not shadow the installed app in Launch Services (Spotlight, open -b).
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -u "$APP" 2>/dev/null || true
 echo "$APP"
 echo "$ZIP"
 echo "$DMG"

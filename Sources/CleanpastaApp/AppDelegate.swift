@@ -1,6 +1,7 @@
 import AppKit
 import ServiceManagement
 import Combine
+import SwiftUI
 import CleanpastaCore
 
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
@@ -9,13 +10,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var subscriptions = Set<AnyCancellable>()
     private var appearanceObservation: NSKeyValueObservation?
     let updater = Updater()
-    lazy var settings = SettingsWindowController(updater: updater)
+    lazy var settings = SettingsWindowController(updater: updater) { [weak self] in self?.showOnboarding() }
+    lazy var onboarding = OnboardingWindowController()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        if Migration.renameBundleIfNeeded() {
-            return // the renamed copy starts in a moment
-        }
-        Migration.afterRename()
+        BrandFont.register()
+        CommandLineTool.moveToLocalBinIfNeeded()
         NSApp.mainMenu = MainMenu.build(target: self)
         AppIcon.apply()
         appearanceObservation = NSApp.observe(\.effectiveAppearance) { _, _ in
@@ -33,7 +33,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let trusted = Clipboard.canPaste
         if preferences.isFirstLaunch {
             preferences.isFirstLaunch = false
-            settings.show()
+            onboarding.show()
         } else if !trusted && UserDefaults.standard.bool(forKey: "accessibilityWasAllowed") {
             // macOS drops the permission when an update changes the app's signature:
             // show the one-click way back instead of failing silently.
@@ -51,22 +51,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
-    /// Opening the app again (Finder, Spotlight, Raycast) shows the settings.
+    /// Opening the app again (Finder, Spotlight, a launcher) shows the settings.
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         settings.show()
         return false
-    }
-
-    // cleanpasta://paste, ://repair, ://settings, ://about (Raycast, scripts)
-    func application(_ application: NSApplication, open urls: [URL]) {
-        for url in urls where ["cleanpasta", "estools-clean-paste"].contains(url.scheme ?? "") { // the second one: links made before the rename
-            switch url.host ?? url.path.trimmingCharacters(in: CharacterSet(charactersIn: "/")) {
-            case "paste": pasteClean(delay: 0.35) // let a launcher (Raycast) close and the target app come back
-            case "repair": repairClipboard()
-            case "about": showAbout()
-            default: settings.show()
-            }
-        }
     }
 
     // MARK: - Hotkeys
@@ -123,11 +111,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc func openSettings() { settings.show() }
 
+    func showOnboarding() { onboarding.show() }
+
     @objc func checkForUpdates() { updater.checkForUpdates() }
 
     lazy var about = AboutWindowController(updater: updater)
 
-    /// The tool, ES Tools, the author and the version, in one window.
+    /// The tool, the author and the version, in one window.
     @objc func showAbout() { about.show() }
 
     static var versionTitle: String {
@@ -145,7 +135,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             image.isTemplate = true
             item.button?.image = image
         }
-        item.button?.toolTip = "ES Tools"
+        item.button?.toolTip = "Cleanpasta"
         let menu = NSMenu()
         menu.delegate = self
         item.menu = menu
@@ -154,8 +144,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
-        // One ES Tools icon in the menu bar; each tool is a section under it.
-        menu.addItem(.sectionHeader(title: "Cleanpasta"))
+        // One icon in the menu bar; the menu below it holds the commands, under a header as in Mowa.
+        let header = NSMenuItem()
+        header.view = MenuHeader.view(status: menuStatus)
+        menu.addItem(header)
+        menu.addItem(.separator())
         let paste = NSMenuItem(title: "Paste Clean", action: #selector(pasteCleanFromMenu), keyEquivalent: "")
         apply(preferences.pasteCleanShortcut, to: paste)
         paste.toolTip = "Clean the clipboard and paste it into the active app."
@@ -183,6 +176,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         for item in menu.items where item.action != #selector(NSApplication.terminate(_:)) && item.action != nil {
             item.target = self
         }
+    }
+
+    /// The line under the name in the menu: what the shortcut does now.
+    private var menuStatus: String {
+        guard Clipboard.canPaste else { return "Allow Accessibility to paste for you" }
+        guard let shortcut = preferences.pasteCleanShortcut else { return "Ready" }
+        return "Ready - \(shortcut.display) pastes clean"
     }
 
     private func apply(_ shortcut: Shortcut?, to item: NSMenuItem) {
@@ -273,54 +273,36 @@ enum DockIcon {
     }
 }
 
-/// From "Clean Paste" (1.0.x) to "Cleanpasta" (1.1.0). Sparkle installs the update under
-/// the old file name, so the app renames itself once and moves the rest along.
-enum Migration {
-    static let oldBundleName = "Clean Paste.app"
-    static let newBundleName = "Cleanpasta.app"
-
-    /// Renames "Clean Paste.app" to "Cleanpasta.app" next to it and relaunches from there.
-    /// Returns true when the renamed copy is starting and this process is about to quit.
-    static func renameBundleIfNeeded() -> Bool {
-        let current = Bundle.main.bundleURL
-        guard current.lastPathComponent == oldBundleName else { return false }
-        let target = current.deletingLastPathComponent().appendingPathComponent(newBundleName)
-        let fm = FileManager.default
-        guard !fm.fileExists(atPath: target.path) else { return false }
-        do {
-            try fm.moveItem(at: current, to: target)
-        } catch {
-            NSLog("Cleanpasta: could not rename the app: %@", error.localizedDescription)
-            return false
-        }
-        let configuration = NSWorkspace.OpenConfiguration()
-        configuration.createsNewApplicationInstance = true
-        NSWorkspace.shared.openApplication(at: target, configuration: configuration) { _, _ in
-            DispatchQueue.main.async { NSApp.terminate(nil) }
-        }
-        return true
+/// The top of the menu bar menu, as in Mowa: the icon, the name and a status line.
+enum MenuHeader {
+    static func view(status: String) -> NSView {
+        let hosting = NSHostingView(rootView: Content(status: status))
+        hosting.frame = NSRect(origin: .zero, size: hosting.fittingSize)
+        return hosting
     }
 
-    /// Once after the rename: the command line tool link and the login item follow the new name.
-    static func afterRename() {
-        let defaults = UserDefaults.standard
-        guard !defaults.bool(forKey: "migratedToCleanpasta") else { return }
-        defaults.set(true, forKey: "migratedToCleanpasta")
-        let fm = FileManager.default
-        var hadLink = false
-        for folder in CommandLineTool.candidateFolders {
-            let old = folder.appendingPathComponent("cleanpaste")
-            if let destination = try? fm.destinationOfSymbolicLink(atPath: old.path), destination.contains("/" + oldBundleName + "/") || destination.contains("/" + newBundleName + "/") {
-                try? fm.removeItem(at: old)
-                hadLink = true
+    private struct Content: View {
+        let status: String
+
+        var body: some View {
+            HStack(spacing: 10) {
+                Image(nsImage: NSApp.applicationIconImage)
+                    .resizable()
+                    .frame(width: 28, height: 28)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(verbatim: "Cleanpasta")
+                        .font(BrandFont.font(13, weight: .semibold))
+                    Text(status)
+                        .font(BrandFont.font(11))
+                        .foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 0)
             }
-        }
-        if hadLink {
-            _ = CommandLineTool.install()
-        }
-        if SMAppService.mainApp.status == .enabled {
-            try? SMAppService.mainApp.unregister()
-            try? SMAppService.mainApp.register()
+            .padding(.horizontal, 14)
+            .padding(.vertical, 6)
+            .frame(minWidth: 260, alignment: .leading)
+            .accessibilityElement(children: .combine)
         }
     }
 }
