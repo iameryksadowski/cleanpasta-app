@@ -14,7 +14,7 @@ const run = (args: string[], input: string | Buffer = '') => spawnSync(bin, args
 test('audit CLI: help, version, usage and empty input exit codes', () => {
   assert.match(run(['--help']).stdout, /Exit codes: 0 done, 1 usage or read error, 2 nothing to clean, 3/);
   assert.equal(run(['--help']).status, 0);
-  assert.equal(run(['--version']).stdout.trim(), '1.1.1');
+  assert.equal(run(['--version']).stdout.trim(), '1.2.0');
   for (const args of [['--unknown'], ['--print', 'xml'], ['--font-size', '73'], ['a', 'b'], ['/missing-file'], ['--repair', 'a']]) {
     assert.equal(run(args).status, 1, args.join(' '));
   }

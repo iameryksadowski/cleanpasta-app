@@ -7,7 +7,7 @@ mkdirSync(new URL('../test-results/', import.meta.url), { recursive: true });
  try {
  const page = await browser.newPage({viewport:{width:560,height:740}});
  await page.addInitScript(() => { window.__TAURI__={core:{invoke:async (cmd,payload)=> {
- if(cmd==='get_settings')return {settings:{replaceDashes:true,replaceQuotes:true,fontSize:12,pasteShortcut:'Ctrl+Alt+Shift+V',repairShortcut:'',showFeedback:true,autoUpdates:false},openAtLogin:false,version:'1.1.1',updatesConfigured:false};
+ if(cmd==='get_settings')return {settings:{replaceDashes:true,replaceQuotes:true,fontSize:12,pasteShortcut:'Ctrl+Alt+Shift+V',repairShortcut:'',showFeedback:true,autoUpdates:false},openAtLogin:false,version:'1.2.0',updatesConfigured:false};
  if(cmd==='save_settings'){window.saved=payload;return;}
  if(cmd==='check_update')throw 'Updates are not configured in this preview. Use the installer supplied by Eryk.';
  }},event:{listen:()=>{}}}; });

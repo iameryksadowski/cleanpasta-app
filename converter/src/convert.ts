@@ -1,5 +1,5 @@
 /**
- * ES Tools Cleanpasta - converter.
+ * Cleanpasta - converter.
  *
  * Turns clipboard content into clean HTML that keeps the structure of the text
  * (bold, italic, underline, links, line breaks, non-breaking spaces, bulleted and
@@ -10,8 +10,8 @@
  * "-", " and ' (both optional); URLs and HTML attributes keep every character.
  *
  * Sources: rich HTML copied from any app, or Markdown copied as plain text.
- * Pure functions only - no Raycast or Node APIs, so the same code runs in the
- * extension, in the CLI script and in tests.
+ * Pure functions only - no platform or Node APIs, so the same code runs in
+ * JavaScriptCore (macOS app and CLI), QuickJS (Windows) and in tests.
  */
 import { Parser } from "htmlparser2";
 

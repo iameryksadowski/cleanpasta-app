@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// "About Cleanpasta": the tool, ES Tools, the author and the version, in one window.
+/// "About Cleanpasta": the tool, the author and the version, in one window.
 final class AboutWindowController: NSObject, NSWindowDelegate {
     private var window: NSWindow?
     private let updater: Updater
@@ -33,15 +33,14 @@ final class AboutWindowController: NSObject, NSWindowDelegate {
 
 enum Links {
     static let website = URL(string: "https://eryksadowski.com")!
-    static let repository = URL(string: "https://github.com/iameryksadowski/estools-app-cleanpasta")!
-    static let releases = URL(string: "https://github.com/iameryksadowski/estools-app-cleanpasta/releases")!
-    static let license = URL(string: "https://github.com/iameryksadowski/estools-app-cleanpasta/blob/main/LICENSE")!
-    static let email = URL(string: "mailto:iam@eryksadowski.com?subject=Clean%20Paste")!
+    static let repository = URL(string: "https://github.com/iameryksadowski/cleanpasta-app")!
+    static let releases = URL(string: "https://github.com/iameryksadowski/cleanpasta-app/releases")!
+    static let license = URL(string: "https://github.com/iameryksadowski/cleanpasta-app/blob/main/LICENSE")!
+    static let email = URL(string: "mailto:iam@eryksadowski.com?subject=Cleanpasta")!
 }
 
 struct AboutView: View {
     let updater: Updater
-    @Environment(\.colorScheme) private var colorScheme
 
     private var version: String { Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev" }
     private var build: String { Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "-" }
@@ -59,7 +58,7 @@ struct AboutView: View {
                 Image(nsImage: NSApp.applicationIconImage)
                     .resizable()
                     .frame(width: 96, height: 96)
-                Text("ES Tools Cleanpasta")
+                Text("Cleanpasta")
                     .font(.system(size: 20, weight: .semibold))
                 Text("Version \(version) (\(build))")
                     .font(.system(.callout, design: .monospaced))
@@ -82,16 +81,9 @@ struct AboutView: View {
 
             Divider()
 
-            // ES Tools
+            // Open source
             VStack(alignment: .leading, spacing: 8) {
-                if let wordmark = image(colorScheme == .dark ? "estools-wordmark-light" : "estools-wordmark-dark") {
-                    Image(nsImage: wordmark)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 22)
-                        .accessibilityLabel("ES Tools")
-                }
-                Text("Small, focused tools for creative and development work. Each tool does one job well, looks and behaves like the others, and updates itself. Open source, MIT license.")
+                Text("Open source, MIT license.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -121,7 +113,7 @@ struct AboutView: View {
                     Text("Eryk Sadowski")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(Color(white: 0.98))
-                    Text("IT & Creative Director · author of ES Tools")
+                    Text("IT & Creative Director")
                         .font(.callout)
                         .foregroundStyle(Color(red: 0.631, green: 0.631, blue: 0.667)) // #A1A1AA
                 }
@@ -144,7 +136,7 @@ struct AboutView: View {
                 Spacer()
                 HStack(spacing: 5) {
                     Circle().fill(accent).frame(width: 6, height: 6)
-                    Text("ES Tools by Eryk Sadowski")
+                    Text("eryksadowski.com")
                 }
             }
             .font(.footnote)

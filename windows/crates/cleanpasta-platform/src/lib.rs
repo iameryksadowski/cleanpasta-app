@@ -32,7 +32,7 @@ pub fn settings_path() -> PathBuf {
     std::env::var_os("APPDATA")
         .map(PathBuf::from)
         .unwrap_or_else(std::env::temp_dir)
-        .join("estools-cleanpasta")
+        .join("cleanpasta")
         .join("settings.json")
 }
 pub fn settings() -> Result<Settings> {

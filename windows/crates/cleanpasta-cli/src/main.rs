@@ -1,7 +1,7 @@
 use cleanpasta_core::{convert, markdown, markdown_body};
 use cleanpasta_platform as platform;
 use std::io::{IsTerminal, Read};
-const HELP: &str = "ES Tools Cleanpasta 1.1.1
+const HELP: &str = "Cleanpasta 1.2.0
 Usage: cleanpasta [FILE] [options]
 Input: FILE, piped stdin, or clipboard. '-' reads stdin.
   --markdown, --md     Markdown (automatic for .md/.markdown)

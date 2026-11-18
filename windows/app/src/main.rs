@@ -10,7 +10,6 @@ use tauri::{
     Emitter, Manager,
 };
 use tauri_plugin_autostart::ManagerExt;
-use tauri_plugin_deep_link::DeepLinkExt;
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
 use tauri_plugin_updater::UpdaterExt;
 
@@ -231,20 +230,6 @@ async fn install_update(app: tauri::AppHandle, version: String) -> Result<()> {
         .map_err(|e| e.to_string())?;
     app.restart();
 }
-fn handle_link(app: &tauri::AppHandle, value: &str) {
-    if let Ok(url) = url::Url::parse(value) {
-        if url.scheme() != "cleanpasta" || !url.username().is_empty() || url.port().is_some() {
-            return;
-        }
-        match url.host_str() {
-            Some("paste") => clipboard_action(app, true, false),
-            Some("repair") => clipboard_action(app, false, false),
-            Some("settings") => show_settings(app, false),
-            Some("about") => show_settings(app, true),
-            _ => {}
-        }
-    }
-}
 fn main() {
     let loaded = platform::settings();
     let startup_error = loaded.as_ref().err().cloned();
@@ -257,8 +242,8 @@ fn main() {
             startup_error: Mutex::new(startup_error),
             show_about: AtomicBool::new(false),
         })
-        .plugin(tauri_plugin_single_instance::init(|_, _, _| {}))
-        .plugin(tauri_plugin_deep_link::init())
+        // Starting the app again (Start menu, a launcher) shows the settings, like on macOS.
+        .plugin(tauri_plugin_single_instance::init(|app, _, _| show_settings(app, false)))
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_autostart::Builder::new().build())
         .plugin(tauri_plugin_updater::Builder::new().build())
@@ -311,7 +296,7 @@ fn main() {
             let icon = tauri::image::Image::from_bytes(icon_bytes)?;
             TrayIconBuilder::with_id("cleanpasta")
                 .icon(icon)
-                .tooltip("ES Tools Cleanpasta")
+                .tooltip("Cleanpasta")
                 .menu(&menu)
                 .on_tray_icon_event(|tray, event| {
                     if let tauri::tray::TrayIconEvent::Click {
@@ -351,22 +336,11 @@ fn main() {
                     }
                 }
             });
-            let handle = app.handle().clone();
-            app.deep_link().on_open_url(move |event| {
-                for url in event.urls() {
-                    handle_link(&handle, url.as_str());
-                }
-            });
-            let links = app.deep_link().get_current()?.unwrap_or_default();
-            let started_from_link = !links.is_empty();
-            for url in links {
-                handle_link(app.handle(), url.as_str());
-            }
-            if !started_from_link && !platform::settings_path().exists() {
+            if !platform::settings_path().exists() {
                 show_settings(app.handle(), false);
             }
             Ok(())
         })
         .run(tauri::generate_context!())
-        .expect("Could not start ES Tools Cleanpasta");
+        .expect("Could not start Cleanpasta");
 }
